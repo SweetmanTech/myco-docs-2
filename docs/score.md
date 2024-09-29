@@ -1,4 +1,4 @@
-# Zora Score
+# Score
 
 Zora Score is a metric designed to measure a user's engagement and activity within the Zora ecosystem. It was originally conceived during the Aleph popup city event in Buenos Aires, when Juampi from Talent Protocol approached the myco.wtf team with the idea of creating a Zora-based score to support the Talent Builder Score. This collaboration led to the development of a quantitative representation of users' contributions and interactions on the Zora platform.
 
