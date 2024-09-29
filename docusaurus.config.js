@@ -79,7 +79,7 @@ const config = {
             label: "Docs",
           },
           {
-            href: "https://github.com/facebook/docusaurus",
+            href: "https://github.com/SweetmanTech/myco-docs-2",
             label: "GitHub",
             position: "right",
           },
