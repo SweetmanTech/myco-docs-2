@@ -4,20 +4,101 @@
  */
 
 .heroBanner {
-  padding: 4rem 0;
-  text-align: center;
   position: relative;
+  padding: 6rem 0;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+
+  color: #985c31;
   overflow: hidden;
 }
 
-@media screen and (max-width: 996px) {
-  .heroBanner {
-    padding: 2rem;
-  }
+.title {
+  font-size: 3rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+}
+
+.subtitle {
+  font-size: 1.5rem;
+  margin-bottom: 2rem;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+  text-align: center;
 }
 
 .buttons {
   display: flex;
-  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
   justify-content: center;
+}
+
+.primaryButton {
+  background-color: #985c31;
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border-radius: 25px;
+  transition: background-color 0.3s ease;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.primaryButton:hover {
+  background-color: #000000;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.secondaryButton {
+  background-color: transparent;
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border: 2px solid white;
+  border-radius: 25px;
+  transition: background-color 0.3s ease, color 0.3s ease;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.secondaryButton:hover {
+  background-color: white;
+  color: #000dff;
+}
+
+.backgroundShape {
+  position: absolute;
+  bottom: -50px;
+  right: -50px;
+  width: 200px;
+  height: 200px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
+  z-index: -1;
+  box-shadow: 0 0 50px rgba(255, 255, 255, 0.2);
+}
+
+@media screen and (max-width: 768px) {
+  .heroBanner {
+    padding: 4rem 1rem;
+  }
+
+  .title {
+    font-size: 2.5rem;
+  }
+
+  .subtitle {
+    font-size: 1.25rem;
+  }
+
+  .backgroundShape {
+    width: 150px;
+    height: 150px;
+    bottom: -30px;
+    right: -30px;
+  }
 }
