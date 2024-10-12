@@ -201,8 +201,8 @@ The `metadata` object contains various fields depending on the event type. Commo
 
 ## Related Documentation
 
-- [Authentication](./rewards.md#authentication)
-- [Myco Profile](./profile.md)
+- [Score](./score.md)
+- [Profile](./profile.md)
 - [Zora Protocol Rewards](https://docs.zora.co/contracts/rewards)
 
 ## Frequently Asked Questions (FAQ)
