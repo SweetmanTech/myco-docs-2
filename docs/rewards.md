@@ -22,7 +22,10 @@ The Myco Rewards API serves as a bridge between Zora's protocol rewards system a
 
 ## Demo Video
 
-[A demo video will be added here]
+Watch this demo video to see the Myco Rewards API in action:
+
+<iframe width="560" height="315" src="https://www.youtube.com/embed/JSUeTBq3GzE" frameborder="0" allowfullscreen></iframe>
+This video demonstrates how to use the Myco Rewards API to access and visualize data from the Zora rewards protocol, showcasing its potential for creating powerful analytics tools and dashboards for creators.
 
 ## How to Use
 
