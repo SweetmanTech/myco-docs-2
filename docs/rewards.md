@@ -150,7 +150,7 @@ The `metadata` object contains various fields depending on the event type. Commo
 
 ### Example Response
 
-```
+```json
 {
   "message": "success",
   "address": "0xcfBf34d385EA2d5Eb947063b67eA226dcDA3DC38",
