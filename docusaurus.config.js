@@ -86,7 +86,7 @@ const config = {
         ],
       },
       footer: {
-        style: "dark",
+        style: "light",
         links: [
           {
             title: "Docs",
@@ -109,19 +109,19 @@ const config = {
             title: "Products",
             items: [
               {
-                label: "MycoCreate",
+                label: "Create",
                 href: "https://create.myco.wtf",
               },
               {
-                label: "MycoProfile",
+                label: "Profile",
                 href: "https://profile.myco.wtf",
               },
               {
-                label: "MycoAPI",
+                label: "API",
                 href: "https://api.myco.wtf",
               },
               {
-                label: "MycoChat",
+                label: "Chat",
                 href: "https://chat.myco.wtf",
               },
             ],
