@@ -29,6 +29,8 @@ This video demonstrates how to use the Myco Rewards API to access and visualize 
 
 ## How to Use
 
+` https://myco.wtf/api/zora/rewards`
+
 To use the Myco Rewards API, you can make a GET request to the endpoint with the creator's address as a parameter. Here's an example of how to do this using JavaScript and the Fetch API:
 
 ### Example GET Request
