@@ -41,7 +41,7 @@ This video demonstrates how to use the Myco Rewards API to access and visualize 
 
 ## How to Use
 
-` https://myco.wtf/api/zora/rewards`
+`https://myco.wtf/api/zora/rewards`
 
 The Myco Rewards API allows you to retrieve reward information for a specific Ethereum address. Below are examples of how to perform a GET request using different programming languages and tools.
 
