@@ -29,11 +29,25 @@ This video demonstrates how to use the Myco Rewards API to access and visualize 
 
 ## How to Use
 
-[Instructions on how to use the Rewards feature will be added here]
+To use the Myco Rewards API, you can make a GET request to the endpoint with the creator's address as a parameter. Here's an example of how to do this using JavaScript and the Fetch API:
 
 ### Example GET Request
 
-[An example JavaScript GET call using fetch will be added here]
+javascript
+
+```
+const address = '0x33912a0d6bEFf5Fb8e5B70688CE858D5e7E8104E'; // newtroarts.eth
+const url = https://myco.wtf/api/zora/rewards?address=${address};
+fetch(url)
+.then(response => response.json())
+.then(data => {
+    console.log('Rewards data:', data);
+    // Process the rewards data here
+})
+.catch(error => {
+    console.error('Error fetching rewards data:', error);
+});
+```
 
 ## Definitions
 
