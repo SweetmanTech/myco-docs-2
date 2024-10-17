@@ -104,18 +104,18 @@ The API returns a JSON object with the following structure:
 
 #### Response Object
 
-| Field                       | Type   | Description                                |
-| --------------------------- | ------ | ------------------------------------------ |
-| `zoraCreateReferralRewards` | number | Rewards earned from Zora create referrals  |
-| `zoraMintReferralRewards`   | number | Rewards earned from Zora mint referrals    |
-| `zoraFirstMinterRewards`    | number | Rewards earned as first minter on Zora     |
-| `zoraCreatorRewards`        | number | Rewards earned as a creator on Zora        |
-| `baseCreateReferralRewards` | number | Rewards earned from Base create referrals  |
-| `baseMintReferralRewards`   | number | Rewards earned from Base mint referrals    |
-| `baseFirstMinterRewards`    | number | Rewards earned as first minter on Base     |
-| `baseCreatorRewards`        | number | Rewards earned as a creator on Base        |
-| `totalRewards`              | number | Total rewards earned across all categories |
-| `events`                    | array  | An array of reward event objects           |
+| Field                       | Type   | Description                                               |
+| --------------------------- | ------ | --------------------------------------------------------- |
+| `zoraCreateReferralRewards` | number | Rewards earned from Zora create referrals (**sparks** ✧)  |
+| `zoraMintReferralRewards`   | number | Rewards earned from Zora mint referrals (**sparks** ✧)    |
+| `zoraFirstMinterRewards`    | number | Rewards earned as first minter on Zora (**sparks** ✧)     |
+| `zoraCreatorRewards`        | number | Rewards earned as a creator on Zora (**sparks** ✧)        |
+| `baseCreateReferralRewards` | number | Rewards earned from Base create referrals (**sparks** ✧)  |
+| `baseMintReferralRewards`   | number | Rewards earned from Base mint referrals (**sparks** ✧)    |
+| `baseFirstMinterRewards`    | number | Rewards earned as first minter on Base (**sparks** ✧)     |
+| `baseCreatorRewards`        | number | Rewards earned as a creator on Base (**sparks** ✧)        |
+| `totalRewards`              | number | Total rewards earned across all categories (**sparks** ✧) |
+| `events`                    | array  | An array of reward event objects                          |
 
 #### Event Object
 
