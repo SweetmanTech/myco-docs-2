@@ -226,7 +226,7 @@ The rewards data is updated in real-time as transactions occur on the Zora proto
 
 ### 3. **What units are the rewards amounts in?**
 
-Rewards amounts are denominated in wei, the smallest unit of ether. Ensure you convert them to standard units (e.g., ETH) as needed.
+Rewards amounts are denominated in **sparks**. Ensure you convert them to standard units (e.g., ETH) as needed.
 
 ### 4. **Is there a sandbox environment available for testing?**
 
