@@ -104,18 +104,18 @@ The API returns a JSON object with the following structure:
 
 #### Response Object
 
-| Field                       | Type   | Description                                |
-| --------------------------- | ------ | ------------------------------------------ |
-| `zoraCreateReferralRewards` | number | Rewards earned from Zora create referrals  |
-| `zoraMintReferralRewards`   | number | Rewards earned from Zora mint referrals    |
-| `zoraFirstMinterRewards`    | number | Rewards earned as first minter on Zora     |
-| `zoraCreatorRewards`        | number | Rewards earned as a creator on Zora        |
-| `baseCreateReferralRewards` | number | Rewards earned from Base create referrals  |
-| `baseMintReferralRewards`   | number | Rewards earned from Base mint referrals    |
-| `baseFirstMinterRewards`    | number | Rewards earned as first minter on Base     |
-| `baseCreatorRewards`        | number | Rewards earned as a creator on Base        |
-| `totalRewards`              | number | Total rewards earned across all categories |
-| `events`                    | array  | An array of reward event objects           |
+| Field                       | Type   | Description                                               |
+| --------------------------- | ------ | --------------------------------------------------------- |
+| `zoraCreateReferralRewards` | number | Rewards earned from Zora create referrals (**sparks** ✧)  |
+| `zoraMintReferralRewards`   | number | Rewards earned from Zora mint referrals (**sparks** ✧)    |
+| `zoraFirstMinterRewards`    | number | Rewards earned as first minter on Zora (**sparks** ✧)     |
+| `zoraCreatorRewards`        | number | Rewards earned as a creator on Zora (**sparks** ✧)        |
+| `baseCreateReferralRewards` | number | Rewards earned from Base create referrals (**sparks** ✧)  |
+| `baseMintReferralRewards`   | number | Rewards earned from Base mint referrals (**sparks** ✧)    |
+| `baseFirstMinterRewards`    | number | Rewards earned as first minter on Base (**sparks** ✧)     |
+| `baseCreatorRewards`        | number | Rewards earned as a creator on Base (**sparks** ✧)        |
+| `totalRewards`              | number | Total rewards earned across all categories (**sparks** ✧) |
+| `events`                    | array  | An array of reward event objects                          |
 
 #### Event Object
 
@@ -133,20 +133,29 @@ Each object in the `events` array contains:
 
 The `metadata` object contains various fields depending on the event type. Common fields include:
 
-| Field             | Type   | Description                       |
-| ----------------- | ------ | --------------------------------- |
-| `from`            | string | Address of the sender             |
-| `zora`            | string | Zora contract address             |
-| `creator`         | string | Address of the creator            |
-| `feeType`         | string | Type of fee (e.g., "firstMinter") |
-| `network`         | string | Network where the event occurred  |
-| `tokenId`         | string | ID of the token involved          |
-| `quantity`        | string | Quantity of tokens                |
-| `uniqueId`        | string | Unique identifier for the event   |
-| `collector`       | string | Address of the collector          |
-| `zoraReward`      | string | Amount of Zora reward             |
-| `blockNumber`     | string | Block number of the transaction   |
-| `transactionHash` | string | Hash of the transaction           |
+| Field                     | Type   | Description                                          |
+| ------------------------- | ------ | ---------------------------------------------------- |
+| `from`                    | string | Address of the sender                                |
+| `zora`                    | string | Zora contract address                                |
+| `creator`                 | string | Address of the creator                               |
+| `feeType`                 | string | Type of fee (e.g., "firstMinter")                    |
+| `network`                 | string | Network where the event occurred                     |
+| `tokenId`                 | string | ID of the token involved                             |
+| `quantity`                | string | Quantity of tokens                                   |
+| `uniqueId`                | string | Unique identifier for the event                      |
+| `collector`               | string | Address of the collector                             |
+| `zoraReward`              | string | Amount of Zora reward (**sparks** ✧)                 |
+| `blockNumber`             | string | Block number of the transaction                      |
+| `transactionHash`         | string | Hash of the transaction                              |
+| `firstMinter`             | string | Address of the first minter                          |
+| `mintReferral`            | string | Address of the mint referral                         |
+| `creatorReward`           | string | Reward amount for the creator (**sparks** ✧)         |
+| `createReferral`          | string | Address of the create referral                       |
+| `collectionAddress`       | string | Address of the collection involved                   |
+| `firstMinterReward`       | string | Reward amount for the first minter (**sparks** ✧)    |
+| `mintReferralReward`      | string | Reward amount for the mint referral (**sparks** ✧)   |
+| `createReferralReward`    | string | Reward amount for the create referral (**sparks** ✧) |
+| `protocolRewardsContract` | string | Address of the protocol rewards contract             |
 
 ### Example Response
 
@@ -217,7 +226,7 @@ The rewards data is updated in real-time as transactions occur on the Zora proto
 
 ### 3. **What units are the rewards amounts in?**
 
-Rewards amounts are denominated in wei, the smallest unit of ether. Ensure you convert them to standard units (e.g., ETH) as needed.
+Rewards amounts are denominated in **sparks**. Ensure you convert them to standard units (e.g., ETH) as needed.
 
 ### 4. **Is there a sandbox environment available for testing?**
 
