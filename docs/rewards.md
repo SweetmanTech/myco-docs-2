@@ -133,20 +133,29 @@ Each object in the `events` array contains:
 
 The `metadata` object contains various fields depending on the event type. Common fields include:
 
-| Field             | Type   | Description                       |
-| ----------------- | ------ | --------------------------------- |
-| `from`            | string | Address of the sender             |
-| `zora`            | string | Zora contract address             |
-| `creator`         | string | Address of the creator            |
-| `feeType`         | string | Type of fee (e.g., "firstMinter") |
-| `network`         | string | Network where the event occurred  |
-| `tokenId`         | string | ID of the token involved          |
-| `quantity`        | string | Quantity of tokens                |
-| `uniqueId`        | string | Unique identifier for the event   |
-| `collector`       | string | Address of the collector          |
-| `zoraReward`      | string | Amount of Zora reward             |
-| `blockNumber`     | string | Block number of the transaction   |
-| `transactionHash` | string | Hash of the transaction           |
+| Field                     | Type   | Description                                          |
+| ------------------------- | ------ | ---------------------------------------------------- |
+| `from`                    | string | Address of the sender                                |
+| `zora`                    | string | Zora contract address                                |
+| `creator`                 | string | Address of the creator                               |
+| `feeType`                 | string | Type of fee (e.g., "firstMinter")                    |
+| `network`                 | string | Network where the event occurred                     |
+| `tokenId`                 | string | ID of the token involved                             |
+| `quantity`                | string | Quantity of tokens                                   |
+| `uniqueId`                | string | Unique identifier for the event                      |
+| `collector`               | string | Address of the collector                             |
+| `zoraReward`              | string | Amount of Zora reward (**sparks** ✧)                 |
+| `blockNumber`             | string | Block number of the transaction                      |
+| `transactionHash`         | string | Hash of the transaction                              |
+| `firstMinter`             | string | Address of the first minter                          |
+| `mintReferral`            | string | Address of the mint referral                         |
+| `creatorReward`           | string | Reward amount for the creator (**sparks** ✧)         |
+| `createReferral`          | string | Address of the create referral                       |
+| `collectionAddress`       | string | Address of the collection involved                   |
+| `firstMinterReward`       | string | Reward amount for the first minter (**sparks** ✧)    |
+| `mintReferralReward`      | string | Reward amount for the mint referral (**sparks** ✧)   |
+| `createReferralReward`    | string | Reward amount for the create referral (**sparks** ✧) |
+| `protocolRewardsContract` | string | Address of the protocol rewards contract             |
 
 ### Example Response
 
