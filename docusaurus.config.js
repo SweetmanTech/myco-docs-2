@@ -12,7 +12,7 @@ const config = {
   tagline: "tools for creative builders",
   favicon: "img/favicon.ico",
 
-  // Set the production url of your site here
+  // Set the production url of your website here
   url: "https://your-docusaurus-site.example.com",
   // Set the /<baseUrl>/ pathname under which your site is served
   // For GitHub pages deployment, it is often '/<projectName>/'
