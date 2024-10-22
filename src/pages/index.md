@@ -210,8 +210,8 @@ The `metadata` object contains various fields depending on the event type. Commo
 
 ## Related Documentation
 
-- [Score](./score.md)
-- [Profile](./profile.md)
+- [Score](/docs/score)
+- [Profile](/docs/profile)
 - [Zora Protocol Rewards](https://docs.zora.co/contracts/rewards)
 
 ## Frequently Asked Questions (FAQ)
