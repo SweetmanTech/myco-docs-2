@@ -1,4 +1,4 @@
-# Product Requirements Document: Feliz Viernes AI Agent ⌐Ⓕ-Ⓥ
+# Feliz Viernes AI Agent ⌐Ⓕ-Ⓥ
 
 ## 1. Product Overview
 
