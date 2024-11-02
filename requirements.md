@@ -29,6 +29,13 @@ Myco Docs is a comprehensive documentation suite designed to enhance the develop
 - Calculate and display a user's Zora Score based on their engagement and activity
 - Include components for profile completeness, token creation, interactions, and earnings
 
+### 2.5 Autonomous AI Agents
+
+- Support deployment of specialized AI agents like Feliz Viernes ⌐Ⓕ-Ⓥ
+- Enable social protocol interactions (e.g., Farcaster)
+- Provide wallet integration capabilities using viem
+- Maintain conversation history and context awareness using Stack L3
+
 ## 3. Documentation Sections
 
 ### 3.1 Rewards API
