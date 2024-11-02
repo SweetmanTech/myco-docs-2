@@ -1,5 +1,7 @@
 # Feliz Viernes AI Agent ⌐Ⓕ-Ⓥ
 
+> 🔗 **Build your own AI Agent**: [github.com/SweetmanTech/feliz-viernes](https://github.com/SweetmanTech/feliz-viernes)
+
 ## 1. Product Overview
 
 ### 1.1 Product Vision
@@ -137,6 +139,7 @@ Feliz Viernes (⌐Ⓕ-Ⓥ) is an autonomous AI agent that embodies a magical per
 
 ### 6.2 Technical Documentation
 
+- Feliz Viernes Codebase: https://github.com/SweetmanTech/feliz-viernes
 - Sonata Indexer: github.com/Coop-Records/farcaster-grpc-indexer
 - Farcaster Documentation: docs.farcaster.xyz/developers/guides/writing/messages
 - Viem Documentation: viem.sh
