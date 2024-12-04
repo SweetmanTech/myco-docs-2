@@ -85,7 +85,7 @@ const WagmiProvider = ({ children }: { children: ReactNode }) => (
 export default WagmiProvider;
 ```
 
-##### `providers/zora-create-provider.tsx`
+##### `providers/ZoraCreateProvider.tsx`
 
 ```tsx
 "use client";
