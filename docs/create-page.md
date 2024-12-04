@@ -134,7 +134,6 @@ import { useState } from "react";
 import { useAccount, useSwitchChain } from "wagmi";
 import { useWriteContracts } from "wagmi/experimental";
 import { CHAIN_ID, PROFILE_APP_URL } from "@/lib/consts";
-import { usePaymasterProvider } from "@/providers/PaymasterProvider";
 import useCreateSuccess from "@/hooks/useCreateSuccess";
 import { toast } from "react-toastify";
 import { useParams, useRouter } from "next/navigation";
@@ -144,8 +143,7 @@ import useZoraCreateParameters from "./useZoraCreateParameters";
 export default function useZoraCreate() {
   const { push } = useRouter();
   const { address } = useAccount();
-  const { getCapabilities } = usePaymasterProvider();
-  const { data: callsStatusId, writeContractsAsync } = useWriteContracts();
+  const { data: callsStatusId, writeContractAsync } = useWriteContracts();
   const { switchChainAsync } = useSwitchChain();
   const [creating, setCreating] = useState<boolean>(false);
   const params = useParams();
@@ -175,9 +173,8 @@ export default function useZoraCreate() {
         throw new Error("Parameters not ready");
       }
 
-      await writeContractsAsync({
-        contracts: [{ ...parameters }],
-        capabilities: getCapabilities(chainId),
+      await writeContractAsync({
+        ...parameters,
       } as any);
     } catch (err) {
       setCreating(false);
