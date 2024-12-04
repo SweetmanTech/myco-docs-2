@@ -53,9 +53,9 @@ module.exports = {
 };
 ```
 
-### 3. Create Required Files
+## Create Required Files
 
-#### Providers
+### Providers
 
 First, create the necessary providers:
 
@@ -121,7 +121,7 @@ const useZoraCreateProvider = () => {
 export { ZoraCreateProvider, useZoraCreateProvider };
 ```
 
-#### Hooks
+### Hooks
 
 Create the following hooks:
 
@@ -252,7 +252,7 @@ const useFileUpload = () => {
 export default useFileUpload;
 ```
 
-#### Components
+### Components
 
 First, create some utility components:
 
