@@ -22,7 +22,7 @@ The `<CreatePage />` component is a beautifully designed, ready-to-use component
 ## Installation
 
 ```bash
-npm install wagmi viem @zoralabs/protocol-sdk @zoralabs/protocol-deployments clsx tailwind-merge @tanstack/react-query
+npm install wagmi viem @zoralabs/protocol-sdk @zoralabs/protocol-deployments clsx tailwind-merge @tanstack/react-query lucide-react
 ```
 
 ## Required Setup
@@ -363,6 +363,14 @@ export default function Spinner() {
 }
 ```
 
+### ui/button
+
+- ShadCN Button https://ui.shadcn.com/docs/components/button
+
+### ui/slider
+
+- ShadCN Slider https://ui.shadcn.com/docs/components/slider
+
 ### MediaUpload/UploadIcon
 
 ```tsx
@@ -409,12 +417,12 @@ export default NoFileSelected;
 ### MediaUpload/AudioPlayer
 
 ```tsx
-import getIpfsLink from "@/lib/ipfs/getIpfsLink";
+import { getIpfsLink } from "@/lib/utils";
 import { useZoraCreateProvider } from "@/providers/ZoraCreateProvider";
 import { useRef, useState } from "react";
-import Button from "../Button";
-import { Pause, Play } from "lucide-react";
+import Button from "../ui/Button";
 import { Slider } from "../ui/Slider";
+import { Pause, Play } from "lucide-react";
 
 const AudioPlayer = ({ onClick }) => {
   const { imageUri, animationUri } = useZoraCreateProvider();
