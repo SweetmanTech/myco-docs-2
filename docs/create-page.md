@@ -391,7 +391,7 @@ export default UploadIcon;
 ### MediaUpload/NoFileSelected.tsx
 
 ```tsx
-import UploadIcon from "../Icons/UploadIcon";
+import UploadIcon from "./UploadIcon";
 
 const NoFileSelected = ({ onClick }) => (
   <div
