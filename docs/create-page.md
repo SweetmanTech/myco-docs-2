@@ -59,13 +59,20 @@ module.exports = {
 
 First, create the necessary providers:
 
-##### `providers/wagmi-provider.tsx`
+##### `providers/WagmiProvider.tsx`
 
 ```tsx
-"use client";
-
-import { createConfig, WagmiConfig, http } from "wagmi";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { ReactNode } from "react";
 import { base } from "wagmi/chains";
+import {
+  createConfig,
+  WagmiConfig,
+  http,
+  WagmiProvider as WProvider,
+} from "wagmi";
+
+const queryClient = new QueryClient();
 
 const config = createConfig({
   chains: [base],
@@ -74,9 +81,13 @@ const config = createConfig({
   },
 });
 
-export function WagmiProvider({ children }: { children: React.ReactNode }) {
-  return <WagmiConfig config={config}>{children}</WagmiConfig>;
-}
+const WagmiProvider = ({ children }: { children: ReactNode }) => (
+  <WProvider config={config}>
+    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+  </WProvider>
+);
+
+export default WagmiProvider;
 ```
 
 ##### `providers/zora-create-provider.tsx`
@@ -84,127 +95,101 @@ export function WagmiProvider({ children }: { children: React.ReactNode }) {
 ```tsx
 "use client";
 
-import { createPublicClient, http } from "viem";
-import { base } from "viem/chains";
-import { createContext, useContext, useState } from "react";
-import {
-  zoraCreator1155FactoryImplABI,
-  zoraCreator1155FactoryImplAddress,
-} from "@zoralabs/protocol-deployments";
+import useZoraCreate from "@/hooks/useZoraCreate";
+import React, { createContext, useContext, useMemo } from "react";
 
-interface ZoraCreateContextType {
-  createToken: (params: CreateTokenParams) => Promise<string>;
-  isLoading: boolean;
-  error: Error | null;
-}
+const ZoraCreateContext =
+  createContext<ReturnType<typeof useZoraCreate>>(undefined);
 
-interface CreateTokenParams {
-  name: string;
-  symbol: string;
-  description?: string;
-  mediaUrl?: string;
-}
+const ZoraCreateProvider = ({ children }: any) => {
+  const zoraCreate = useZoraCreate();
 
-const ZoraCreateContext = createContext<ZoraCreateContextType>({
-  createToken: async () => "",
-  isLoading: false,
-  error: null,
-});
-
-export function ZoraCreateProvider({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<Error | null>(null);
-
-  const publicClient = createPublicClient({
-    chain: base,
-    transport: http(),
-  });
-
-  const createToken = async (params: CreateTokenParams) => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      const { hash } = await publicClient.writeContract({
-        address: zoraCreator1155FactoryImplAddress,
-        abi: zoraCreator1155FactoryImplABI,
-        functionName: "createContract",
-        args: [
-          params.name,
-          params.symbol,
-          params.description || "",
-          0,
-          params.mediaUrl || "",
-        ],
-      });
-      const receipt = await publicClient.waitForTransactionReceipt({ hash });
-      return receipt.transactionHash;
-    } catch (err) {
-      setError(err as Error);
-      throw err;
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  const value = useMemo(() => ({ ...zoraCreate }), [zoraCreate]);
 
   return (
-    <ZoraCreateContext.Provider value={{ createToken, isLoading, error }}>
+    <ZoraCreateContext.Provider value={value}>
       {children}
     </ZoraCreateContext.Provider>
   );
-}
+};
 
-export const useZoraCreate = () => useContext(ZoraCreateContext);
+const useZoraCreateProvider = () => {
+  const context = useContext(ZoraCreateContext);
+  if (!context) {
+    throw new Error(
+      "useZoraCreateProvider must be used within a ZoraCreateProvider"
+    );
+  }
+  return context;
+};
+
+export { ZoraCreateProvider, useZoraCreateProvider };
 ```
 
 #### Hooks
 
 Create the following hooks:
 
-##### `hooks/use-media-upload.tsx`
+##### `hooks/useFileUpload.tsx`
 
 ```tsx
-"use client";
-
+import { MAX_FILE_SIZE, ONE_MB } from "@/lib/consts";
+import { uploadFile } from "@/lib/ipfs/uploadFile";
+import { useZoraCreateProvider } from "@/providers/ZoraCreateProvider";
 import { useState } from "react";
 
-interface UseMediaUploadResult {
-  uploadMedia: (file: File) => Promise<string>;
-  isUploading: boolean;
-  error: Error | null;
-}
+const useFileUpload = () => {
+  const { setName, setImageUri, setAnimationUri, setMimeType, animationUri } =
+    useZoraCreateProvider();
+  const [blurImageUrl, setBlurImageUrl] = useState<string>("");
+  const [error, setError] = useState<string>("");
+  const [loading, setLoading] = useState<boolean>(false);
 
-export function useMediaUpload(): UseMediaUploadResult {
-  const [isUploading, setIsUploading] = useState(false);
-  const [error, setError] = useState<Error | null>(null);
+  const fileUpload = async (event) => {
+    setError("");
+    setLoading(true);
 
-  const uploadMedia = async (file: File): Promise<string> => {
-    setIsUploading(true);
-    setError(null);
     try {
-      // Implement your media upload logic here
-      // This could be to IPFS, Arweave, or your preferred storage
-      const url = await uploadToStorage(file);
-      return url;
+      const file = event.target.files[0];
+      if (!file) {
+        throw new Error();
+      }
+      if (file.size > MAX_FILE_SIZE) {
+        throw new Error(
+          `File size exceeds the maximum limit of ${MAX_FILE_SIZE / ONE_MB}MB.`
+        );
+      }
+
+      const mimeType = file.type;
+      const isImage = mimeType.includes("image");
+
+      if (isImage) {
+        const fileNameWithoutExtension = file.name.replace(/\.[^/.]+$/, "");
+        setName(fileNameWithoutExtension);
+      }
+
+      const { uri } = await uploadFile(file);
+      if (isImage) {
+        setImageUri(uri);
+        setBlurImageUrl(URL.createObjectURL(file));
+        if (!animationUri) {
+          setMimeType(mimeType);
+        }
+      } else {
+        setAnimationUri(uri);
+        setMimeType(mimeType);
+      }
     } catch (err) {
-      setError(err as Error);
-      throw err;
-    } finally {
-      setIsUploading(false);
+      console.error(err);
+      setError(err.message ?? "Failed to upload the file. Please try again.");
     }
+    setLoading(false);
   };
 
-  return { uploadMedia, isUploading, error };
-}
+  return { fileUpload, loading, error, blurImageUrl };
+};
 
-// Example implementation - replace with your preferred storage solution
-async function uploadToStorage(file: File): Promise<string> {
-  // Implement your storage upload logic here
-  return "https://example.com/media/1234";
-}
+export default useFileUpload;
 ```
 
 #### Components
@@ -240,91 +225,128 @@ export function getIpfsLink(uri?: string) {
 }
 ```
 
-##### `components/media-upload/no-file-selected.tsx`
+##### `components/MediaUpload/NoFileSelected.tsx`
 
 ```tsx
-interface NoFileSelectedProps {
-  onClick: () => void;
-}
+import UploadIcon from "../Icons/UploadIcon";
 
-export default function NoFileSelected({ onClick }: NoFileSelectedProps) {
-  return (
-    <div
-      onClick={onClick}
-      className="absolute inset-0 flex flex-col items-center justify-center cursor-pointer"
-    >
-      <svg
-        className="w-8 h-8 mb-4 text-gray-500"
-        fill="none"
-        stroke="currentColor"
-        viewBox="0 0 24 24"
-      >
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeWidth={2}
-          d="M12 6v6m0 0v6m0-6h6m-6 0H6"
-        />
-      </svg>
-      <span className="text-gray-500">Click to upload media</span>
-    </div>
-  );
-}
+const NoFileSelected = ({ onClick }) => (
+  <div
+    className="absolute inset-0 flex flex-col items-center justify-center space-y-2 text-muted-foreground cursor-pointer"
+    onClick={onClick}
+  >
+    <UploadIcon className="w-8 h-8" />
+    <p className="text-sm font-medium">click to upload</p>
+  </div>
+);
+
+export default NoFileSelected;
 ```
 
-##### `components/media-upload/audio-player.tsx`
+##### `components/MediaUpload/AudioPlayer.tsx`
 
 ```tsx
-interface AudioPlayerProps {
-  onClick: () => void;
-}
+import getIpfsLink from "@/lib/ipfs/getIpfsLink";
+import { useZoraCreateProvider } from "@/providers/ZoraCreateProvider";
+import { useRef, useState } from "react";
+import Button from "../Button";
+import { Pause, Play } from "lucide-react";
+import { Slider } from "../ui/Slider";
 
-export default function AudioPlayer({ onClick }: AudioPlayerProps) {
+const AudioPlayer = ({ onClick }) => {
+  const { imageUri, animationUri } = useZoraCreateProvider();
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const audioRef = useRef<HTMLAudioElement>(null);
+
+  const togglePlayPause = () => {
+    if (audioRef.current) {
+      if (isPlaying) {
+        audioRef.current.pause();
+      } else {
+        audioRef.current.play();
+      }
+      setIsPlaying(!isPlaying);
+    }
+  };
+
+  const handleTimeUpdate = () => {
+    if (audioRef.current) {
+      const progress =
+        (audioRef.current.currentTime / audioRef.current.duration) * 100;
+      setProgress(progress);
+    }
+  };
+
+  const handleSliderChange = (value: number[]) => {
+    if (audioRef.current) {
+      const time = (value[0] / 100) * audioRef.current.duration;
+      audioRef.current.currentTime = time;
+      setProgress(value[0]);
+    }
+  };
+
   return (
-    <div
-      onClick={onClick}
-      className="absolute inset-0 flex items-center justify-center cursor-pointer"
-    >
-      <svg
-        className="w-16 h-16 text-gray-500"
-        fill="none"
-        stroke="currentColor"
-        viewBox="0 0 24 24"
-      >
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeWidth={2}
-          d="M9 19V5l12 7-12 7z"
+    <div className="w-full bg-white rounded-lg shadow-lg overflow-hidden">
+      <div className="relative" onClick={onClick}>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={imageUri ? getIpfsLink(imageUri) : ""}
+          alt="Audio cover"
+          className="w-full h-auto cursor-pointer"
         />
-      </svg>
+      </div>
+      <div className="p-4">
+        <audio
+          ref={audioRef}
+          src={getIpfsLink(animationUri)}
+          onTimeUpdate={handleTimeUpdate}
+        />
+        <div className="flex justify-center mb-4">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={togglePlayPause}
+            className="text-primary hover:text-primary-dark"
+          >
+            {isPlaying ? (
+              <Pause className="h-8 w-8" />
+            ) : (
+              <Play className="h-8 w-8" />
+            )}
+          </Button>
+        </div>
+        <Slider
+          value={[progress]}
+          onValueChange={handleSliderChange}
+          max={100}
+          step={1}
+          className="w-full bg-black"
+        />
+      </div>
     </div>
   );
-}
+};
+
+export default AudioPlayer;
 ```
 
-##### `components/media-upload/media-upload.tsx`
+##### `components/MediaUpload/MediaUpload.tsx`
 
 ```tsx
-"use client";
-
-import { useZoraCreate } from "@/providers/zora-create-provider";
-import { useMediaUpload } from "@/hooks/use-media-upload";
-import { cn, getIpfsLink } from "@/lib/utils";
-import Spinner from "@/components/ui/spinner";
+import { useZoraCreateProvider } from "@/providers/ZoraCreateProvider";
+import useFileUpload from "@/hooks/useFileUpload";
+import { cn } from "@/lib/utils";
+import Spinner from "@/components/ui/Spinner";
+import getIpfsLink from "@/lib/ipfs/getIpfsLink";
 import { useRef } from "react";
-import NoFileSelected from "./no-file-selected";
-import AudioPlayer from "./audio-player";
+import NoFileSelected from "./NoFileSelected";
+import AudioPlayer from "./AudioPlayer";
 import Image from "next/image";
 
-export default function MediaUpload() {
-  const { imageUri, animationUri, mimeType } = useZoraCreate();
-  const {
-    uploadMedia: fileUpload,
-    isUploading: loading,
-    error,
-    blurImageUrl,
-  } = useMediaUpload();
+const MediaUpload = () => {
+  const { imageUri, animationUri, mimeType } = useZoraCreateProvider();
+  const { fileUpload, loading, error, blurImageUrl } = useFileUpload();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleImageClick = () => {
@@ -340,11 +362,11 @@ export default function MediaUpload() {
       );
     }
 
-    if (mimeType?.includes("audio")) {
+    if (mimeType.includes("audio")) {
       return <AudioPlayer onClick={handleImageClick} />;
     }
 
-    if (mimeType?.includes("video")) {
+    if (mimeType.includes("video")) {
       return (
         <video controls className="w-full rounded-md">
           <source src={getIpfsLink(animationUri)} type={mimeType} />
@@ -362,7 +384,7 @@ export default function MediaUpload() {
             alt="Image Preview"
             onClick={handleImageClick}
             blurDataURL={blurImageUrl}
-            fill
+            layout="fill"
           />
         </div>
       );
@@ -387,14 +409,15 @@ export default function MediaUpload() {
           type="file"
           className="hidden"
           onChange={fileUpload}
-          accept="image/*,video/*,audio/*"
         />
         {renderMedia()}
       </div>
-      {error && <p className="text-red-500 text-sm mt-2">{error.message}</p>}
+      {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
     </div>
   );
-}
+};
+
+export default MediaUpload;
 ```
 
 Now update the `CreatePage` component to use `MediaUpload`:
@@ -402,153 +425,44 @@ Now update the `CreatePage` component to use `MediaUpload`:
 ```tsx
 "use client";
 
-import { useZoraCreate } from "@/providers/zora-create-provider";
-import { useMediaUpload } from "@/hooks/use-media-upload";
-import { useState } from "react";
+import SaleStrategySelect from "./SaleStrategySelect";
+import Title from "./Title";
+import { useZoraCreateProvider } from "@/providers/ZoraCreateProvider";
+import Spinner from "@/components/ui/Spinner";
+import { useAccount } from "wagmi";
+import LoginButton from "@/components/LoginButton";
+import MediaUpload from "../MediaUpload";
+import CreateButtons from "./CreateButtons";
 
-interface CreatePageProps {
-  className?: string;
-  onSuccess?: (tokenId: string) => void;
-  defaultValues?: CreatePageDefaultValues;
-  theme?: CreatePageTheme;
-}
+export default function CreatePage() {
+  const { creating, name } = useZoraCreateProvider();
+  const { address } = useAccount();
 
-interface CreatePageDefaultValues {
-  name?: string;
-  description?: string;
-  symbol?: string;
-}
-
-interface CreatePageTheme {
-  colors?: {
-    primary?: string;
-    secondary?: string;
-    accent?: string;
-    background?: string;
-  };
-  borderRadius?: string;
-  fontFamily?: string;
-}
-
-export function CreatePage({
-  className = "",
-  onSuccess,
-  defaultValues,
-  theme,
-}: CreatePageProps) {
-  const {
-    createToken,
-    isLoading: isCreating,
-    error: createError,
-  } = useZoraCreate();
-  const { uploadMedia, isUploading, error: uploadError } = useMediaUpload();
-  const [mediaUrl, setMediaUrl] = useState("");
-  const [formData, setFormData] = useState({
-    name: defaultValues?.name || "",
-    symbol: defaultValues?.symbol || "",
-    description: defaultValues?.description || "",
-  });
-
-  const handleMediaChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    try {
-      const url = await uploadMedia(file);
-      setMediaUrl(url);
-    } catch (err) {
-      console.error("Failed to upload media:", err);
-    }
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    try {
-      const tokenId = await createToken({
-        ...formData,
-        mediaUrl,
-        sellerFeeBasisPoints: 0,
-      });
-      onSuccess?.(tokenId);
-    } catch (err) {
-      console.error("Failed to create token:", err);
-    }
-  };
+  if (creating) {
+    return (
+      <>
+        <Spinner />
+        <span>Creating Post!</span>
+      </>
+    );
+  }
 
   return (
-    <div className={className}>
-      <form onSubmit={handleSubmit} className="space-y-6">
-        <div>
-          <label className="block text-sm font-medium text-gray-700">
-            Media
-            <MediaUpload />
-          </label>
+    <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div className="mt-8 md:flex md:space-x-8">
+        <div className="md:w-1/2 flex flex-col items-center gap-5">
+          <MediaUpload />
         </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700">
-            Name
-            <input
-              type="text"
-              value={formData.name}
-              onChange={(e) =>
-                setFormData((prev) => ({ ...prev, name: e.target.value }))
-              }
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
-              required
-            />
-          </label>
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700">
-            Symbol
-            <input
-              type="text"
-              value={formData.symbol}
-              onChange={(e) =>
-                setFormData((prev) => ({ ...prev, symbol: e.target.value }))
-              }
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
-              required
-            />
-          </label>
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700">
-            Description
-            <textarea
-              value={formData.description}
-              onChange={(e) =>
-                setFormData((prev) => ({
-                  ...prev,
-                  description: e.target.value,
-                }))
-              }
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
-            />
-          </label>
-        </div>
-
-        <button
-          type="submit"
-          disabled={isCreating || isUploading}
-          className="w-full px-4 py-2 text-white bg-blue-500 rounded-md hover:bg-blue-600 disabled:opacity-50"
-        >
-          {isUploading
-            ? "Uploading..."
-            : isCreating
-            ? "Creating..."
-            : "Create Token"}
-        </button>
-
-        {(createError || uploadError) && (
-          <p className="text-red-500">
-            {createError?.message || uploadError?.message}
-          </p>
+        {name && (
+          <div className="mt-4 md:mt-0 md:w-1/2 flex flex-col items-center gap-3">
+            <div className="w-full flex flex-col items-start gap-4">
+              <Title />
+              <SaleStrategySelect />
+            </div>
+            {address ? <CreateButtons /> : <LoginButton />}
+          </div>
         )}
-      </form>
+      </div>
     </div>
   );
 }
@@ -559,8 +473,8 @@ Finally, wrap your application with the providers:
 ##### `app/layout.tsx`
 
 ```tsx
-import { WagmiProvider } from "@/providers/wagmi-provider";
-import { ZoraCreateProvider } from "@/providers/zora-create-provider";
+import { WagmiProvider } from "@/providers/WagmiProvider";
+import { ZoraCreateProvider } from "@/providers/ZoraCreateProvider";
 
 export default function RootLayout({
   children,
@@ -590,53 +504,13 @@ These providers and components set up:
 import { CreatePage } from "@/components/create-page";
 
 export default function Create() {
-  const handleSuccess = (tokenId: string) => {
-    console.log(`Token ${tokenId} created successfully!`);
-  };
-
-  return (
-    <CreatePage onSuccess={handleSuccess} className="max-w-4xl mx-auto p-8" />
-  );
+  return <CreatePage />;
 }
 ```
 
 ## Component API
 
-The `<CreatePage />` component accepts the following props:
-
-### Required Props
-
-None - The component works out of the box with zero configuration.
-
-### Optional Props
-
-| Prop            | Type                        | Default        | Description                                              |
-| --------------- | --------------------------- | -------------- | -------------------------------------------------------- |
-| `className`     | `string`                    | `''`           | Additional CSS classes to apply to the root element      |
-| `onSuccess`     | `(tokenId: string) => void` | `undefined`    | Callback function called after successful token creation |
-| `defaultValues` | `CreatePageDefaultValues`   | `undefined`    | Pre-filled values for the creation form                  |
-| `theme`         | `CreatePageTheme`           | `defaultTheme` | Custom theme configuration                               |
-
-### Types
-
-```tsx
-interface CreatePageDefaultValues {
-  name?: string;
-  description?: string;
-  symbol?: string;
-}
-
-interface CreatePageTheme {
-  colors?: {
-    primary?: string;
-    secondary?: string;
-    accent?: string;
-    background?: string;
-  };
-  borderRadius?: string;
-  fontFamily?: string;
-}
-```
+The `<CreatePage />` component does not accept any props.
 
 ## Customization
 
