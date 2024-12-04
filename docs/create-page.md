@@ -22,7 +22,7 @@ The `<CreatePage />` component is a beautifully designed, ready-to-use component
 ## Installation
 
 ```bash
-npm install wagmi viem @zoralabs/zora-721-contracts
+npm install wagmi viem @zoralabs/protocol-deployments
 ```
 
 ## Required Setup
@@ -87,7 +87,10 @@ export function WagmiProvider({ children }: { children: React.ReactNode }) {
 import { createPublicClient, http } from "viem";
 import { base } from "viem/chains";
 import { createContext, useContext, useState } from "react";
-import { zoraCreator721Factory } from "@zoralabs/zora-721-contracts";
+import {
+  zoraCreator1155FactoryImplABI,
+  zoraCreator1155FactoryAddress,
+} from "@zoralabs/protocol-deployments";
 
 interface ZoraCreateContextType {
   createToken: (params: CreateTokenParams) => Promise<string>;
@@ -126,8 +129,9 @@ export function ZoraCreateProvider({
     setError(null);
     try {
       const { hash } = await publicClient.writeContract({
-        ...zoraCreator721Factory,
-        functionName: "createToken",
+        address: zoraCreator1155FactoryAddress,
+        abi: zoraCreator1155FactoryImplABI,
+        functionName: "createContract",
         args: [
           params.name,
           params.symbol,
