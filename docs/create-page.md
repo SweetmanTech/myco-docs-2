@@ -72,3 +72,83 @@ export default function RootLayout({
   );
 }
 ```
+
+## Basic Usage
+
+The simplest way to use the `<CreatePage />` component:
+
+```tsx
+import { CreatePage } from "@myco/create";
+
+export default function Create() {
+  return <CreatePage />;
+}
+```
+
+## Component API
+
+The `<CreatePage />` component accepts the following props:
+
+### Required Props
+
+None - The component works out of the box with zero configuration.
+
+### Optional Props
+
+| Prop            | Type                        | Default        | Description                                              |
+| --------------- | --------------------------- | -------------- | -------------------------------------------------------- |
+| `className`     | `string`                    | `''`           | Additional CSS classes to apply to the root element      |
+| `onSuccess`     | `(tokenId: string) => void` | `undefined`    | Callback function called after successful token creation |
+| `defaultValues` | `CreatePageDefaultValues`   | `undefined`    | Pre-filled values for the creation form                  |
+| `theme`         | `CreatePageTheme`           | `defaultTheme` | Custom theme configuration                               |
+
+### Types
+
+```tsx
+interface CreatePageDefaultValues {
+  name?: string;
+  description?: string;
+  symbol?: string;
+  sellerFeeBasisPoints?: number;
+}
+
+interface CreatePageTheme {
+  colors?: {
+    primary?: string;
+    secondary?: string;
+    accent?: string;
+    background?: string;
+  };
+  borderRadius?: string;
+  fontFamily?: string;
+}
+```
+
+## Customization
+
+### Custom Styling
+
+You can customize the appearance using Tailwind CSS classes:
+
+```tsx
+<CreatePage className="max-w-4xl mx-auto bg-slate-50 p-8 rounded-xl" />
+```
+
+### Custom Theme
+
+Apply your brand colors and styling:
+
+```tsx
+<CreatePage
+  theme={{
+    colors: {
+      primary: "#FF0000",
+      secondary: "#00FF00",
+      accent: "#0000FF",
+      background: "#FFFFFF",
+    },
+    borderRadius: "1rem",
+    fontFamily: "Inter",
+  }}
+/>
+```
