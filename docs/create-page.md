@@ -349,6 +349,27 @@ const useFileUpload = () => {
 export default useFileUpload;
 ```
 
+### useConnectWallet
+
+```tsx
+import { useEffect } from "react";
+import { useAccount, useConnect } from "wagmi";
+
+const useConnectWallet = () => {
+  const { connectors, connectAsync } = useConnect();
+  const { address } = useAccount();
+  const connector = connectors[0];
+
+  const connectWallet = () => connectAsync({ connector });
+
+  return {
+    connectWallet,
+  };
+};
+
+export default useConnectWallet;
+```
+
 ## Components
 
 First, create some utility components:
@@ -591,18 +612,41 @@ const MediaUpload = () => {
 export default MediaUpload;
 ```
 
-Now update the `CreatePage` component to use `MediaUpload`:
+### CreatePage/LoginButton
 
 ```tsx
 "use client";
 
-import SaleStrategySelect from "./SaleStrategySelect";
-import Title from "./Title";
-import { useZoraCreateProvider } from "@/providers/ZoraCreateProvider";
-import Spinner from "@/components/ui/Spinner";
+import { useAccount, useDisconnect } from "wagmi";
+import useConnectWallet from "@/hooks/useConnectWallet";
+import Button from "@/components/ui/button";
+
+export default function LoginButton() {
+  const { status } = useAccount();
+  const { connectWallet } = useConnectWallet();
+  const { disconnect } = useDisconnect();
+
+  if (["connecting", "reconnecting"].includes(status))
+    return <Button disabled>Loading...</Button>;
+
+  if (status === "connected")
+    return <Button onClick={disconnect}>Disconnect</Button>;
+
+  return <Button onClick={connectWallet}>Connect</Button>;
+}
+```
+
+### CreatePage/CreatePage
+
+```tsx
+"use client";
+
 import { useAccount } from "wagmi";
-import LoginButton from "@/components/LoginButton";
-import MediaUpload from "../MediaUpload";
+import { useZoraCreateProvider } from "@/providers/ZoraCreateProvider";
+import Spinner from "@/components/ui/spinner";
+import MediaUpload from "@components/MediaUpload/MediaUpload";
+import LoginButton from "./LoginButton";
+import Title from "./Title";
 import CreateButtons from "./CreateButtons";
 
 export default function CreatePage() {
@@ -628,7 +672,6 @@ export default function CreatePage() {
           <div className="mt-4 md:mt-0 md:w-1/2 flex flex-col items-center gap-3">
             <div className="w-full flex flex-col items-start gap-4">
               <Title />
-              <SaleStrategySelect />
             </div>
             {address ? <CreateButtons /> : <LoginButton />}
           </div>
