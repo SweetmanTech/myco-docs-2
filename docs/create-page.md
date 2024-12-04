@@ -62,14 +62,14 @@ First, create the necessary providers:
 ```tsx
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactNode } from "react";
-import { base } from "wagmi/chains";
 import { coinbaseWallet } from "wagmi/connectors";
 import { createConfig, http, WagmiProvider as WProvider } from "wagmi";
+import { CHAIN, CHAIN_ID } from "@/lib/consts";
 
 const queryClient = new QueryClient();
 
 const config = createConfig({
-  chains: [base],
+  chains: [CHAIN],
   connectors: [
     coinbaseWallet({
       appName: "myco.wtf",
@@ -77,7 +77,7 @@ const config = createConfig({
     }),
   ],
   transports: {
-    [base.id]: http(),
+    [CHAIN_ID]: http(),
   },
 });
 
