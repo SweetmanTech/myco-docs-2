@@ -908,7 +908,6 @@ export default saveFile;
 ### ipfs/uploadFile
 
 ```tsx
-import { hashFiles } from "./hash";
 import saveFile from "./saveFile";
 
 export type IPFSUploadResponse = {
@@ -916,40 +915,21 @@ export type IPFSUploadResponse = {
   uri: string;
 };
 
-const uploadCache = {
-  prefix: "Pinata/IPFSUploadCache",
-  get(files: File[]): IPFSUploadResponse | undefined {
-    const digest = hashFiles(files);
-    try {
-      const cid = localStorage.getItem(`${this.prefix}/${digest}`);
-      if (cid) {
-        return { cid, uri: `ipfs://${cid}` };
-      }
-    } catch (error) {
-      console.error(error);
-    }
-  },
-  put(files: File[], cid: string) {
-    const digest = hashFiles(files);
-    try {
-      localStorage.setItem(`${this.prefix}/${digest}`, cid);
-    } catch (error) {
-      console.error(error);
-    }
-  },
-};
-
 export const uploadFile = async (
   file: File,
   jwt?: string
 ): Promise<IPFSUploadResponse> => {
   try {
+    console.log("uploadingFile...");
     const data = new FormData();
+    console.log("data", data);
+
     data.set("file", file);
-    const cached = uploadCache.get([file]);
-    if (cached) return cached;
+    console.log("file", file);
 
     let cid: any;
+    console.log("jwt", jwt);
+    console.log("data", data);
     if (jwt) {
       cid = await saveFile(data, jwt);
     } else {
@@ -958,33 +938,12 @@ export const uploadFile = async (
       cid = json.cid;
     }
 
-    uploadCache.put([file], cid);
     return { cid, uri: `ipfs://${cid}` };
   } catch (error) {
     console.error(error);
     return { cid: "", uri: "" };
   }
 };
-```
-
-### ipfs/hash
-
-```tsx
-import * as crypto from "crypto";
-
-export function hashFiles(files: File[]): string {
-  const hash = crypto.createHash("sha256");
-  for (const file of files) {
-    const simplifiedFile = {
-      name: file.name,
-      lastModified: file.lastModified,
-      size: file.size,
-      type: file.type,
-    };
-    hash.update(JSON.stringify(simplifiedFile));
-  }
-  return `0x${hash.digest("hex")}`;
-}
 ```
 
 ### ipfs/generatePinataJWT
