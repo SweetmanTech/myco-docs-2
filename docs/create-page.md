@@ -99,7 +99,6 @@ interface CreateTokenParams {
   name: string;
   symbol: string;
   description?: string;
-  sellerFeeBasisPoints?: number;
   mediaUrl?: string;
 }
 
@@ -133,7 +132,7 @@ export function ZoraCreateProvider({
           params.name,
           params.symbol,
           params.description || "",
-          params.sellerFeeBasisPoints || 0,
+          0,
           params.mediaUrl || "",
         ],
       });
@@ -228,7 +227,6 @@ interface CreatePageDefaultValues {
   name?: string;
   description?: string;
   symbol?: string;
-  sellerFeeBasisPoints?: number;
 }
 
 interface CreatePageTheme {
@@ -259,7 +257,6 @@ export function CreatePage({
     name: defaultValues?.name || "",
     symbol: defaultValues?.symbol || "",
     description: defaultValues?.description || "",
-    sellerFeeBasisPoints: defaultValues?.sellerFeeBasisPoints || 0,
   });
 
   const handleMediaChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -280,6 +277,7 @@ export function CreatePage({
       const tokenId = await createToken({
         ...formData,
         mediaUrl,
+        sellerFeeBasisPoints: 0,
       });
       onSuccess?.(tokenId);
     } catch (err) {
@@ -332,28 +330,6 @@ export function CreatePage({
                 }))
               }
               className="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
-            />
-          </label>
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700">
-            Royalty (%)
-            <input
-              type="number"
-              value={formData.sellerFeeBasisPoints / 100}
-              onChange={(e) =>
-                setFormData((prev) => ({
-                  ...prev,
-                  sellerFeeBasisPoints: Math.floor(
-                    parseFloat(e.target.value) * 100
-                  ),
-                }))
-              }
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
-              min="0"
-              max="100"
-              step="0.01"
             />
           </label>
         </div>
@@ -463,7 +439,6 @@ interface CreatePageDefaultValues {
   name?: string;
   description?: string;
   symbol?: string;
-  sellerFeeBasisPoints?: number;
 }
 
 interface CreatePageTheme {
@@ -536,7 +511,7 @@ export default function CreateCollectionToken() {
       defaultValues={{
         name: "My Collection",
         symbol: "MYCOL",
-        sellerFeeBasisPoints: 500, // 5%
+        description: "A beautiful collection of digital art",
       }}
     />
   );
