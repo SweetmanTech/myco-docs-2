@@ -63,12 +63,12 @@ Create the following files in your project:
 "use client";
 
 import { createConfig, WagmiConfig, http } from "wagmi";
-import { mainnet } from "wagmi/chains";
+import { base } from "wagmi/chains";
 
 const config = createConfig({
-  chains: [mainnet],
+  chains: [base],
   transports: {
-    [mainnet.id]: http(),
+    [base.id]: http(),
   },
 });
 
@@ -83,7 +83,7 @@ export function WagmiProvider({ children }: { children: React.ReactNode }) {
 "use client";
 
 import { createPublicClient, http } from "viem";
-import { mainnet } from "viem/chains";
+import { base } from "viem/chains";
 import { createContext, useContext, useState } from "react";
 import { zoraCreator721Factory } from "@zoralabs/zora-721-contracts";
 
@@ -116,7 +116,7 @@ export function ZoraCreateProvider({
   const [error, setError] = useState<Error | null>(null);
 
   const publicClient = createPublicClient({
-    chain: mainnet,
+    chain: base,
     transport: http(),
   });
 
