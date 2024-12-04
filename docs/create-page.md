@@ -82,7 +82,7 @@ const WagmiProvider = ({ children }: { children: ReactNode }) => (
   </WProvider>
 );
 
-export default WagmiProvider;
+export { WagmiProvider };
 ```
 
 ##### `providers/ZoraCreateProvider.tsx`
