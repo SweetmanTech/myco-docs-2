@@ -558,6 +558,17 @@ These providers and components set up:
 - Type-safe context for token creation
 - Beautiful UI with Tailwind CSS
 
+### Libs
+
+##### `app/const.tsx`
+
+```tsx
+import { base } from "wagmi/chains";
+export const CHAIN = base;
+export const CHAIN_ID = CHAIN.id;
+export const PROFILE_APP_URL = "https://profile.myco.wtf";
+```
+
 ## Basic Usage
 
 ```tsx
