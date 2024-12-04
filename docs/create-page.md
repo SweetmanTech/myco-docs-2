@@ -89,7 +89,7 @@ import { base } from "viem/chains";
 import { createContext, useContext, useState } from "react";
 import {
   zoraCreator1155FactoryImplABI,
-  zoraCreator1155FactoryAddress,
+  zoraCreator1155FactoryImplAddress,
 } from "@zoralabs/protocol-deployments";
 
 interface ZoraCreateContextType {
@@ -129,7 +129,7 @@ export function ZoraCreateProvider({
     setError(null);
     try {
       const { hash } = await publicClient.writeContract({
-        address: zoraCreator1155FactoryAddress,
+        address: zoraCreator1155FactoryImplAddress,
         abi: zoraCreator1155FactoryImplABI,
         functionName: "createContract",
         args: [
