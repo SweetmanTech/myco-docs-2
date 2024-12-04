@@ -390,6 +390,14 @@ export default function Spinner() {
 
 - ShadCN Slider https://ui.shadcn.com/docs/components/slider
 
+### ui/input
+
+- ShadCN Input https://ui.shadcn.com/docs/components/input
+
+### ui/label
+
+- ShadCN Label https://ui.shadcn.com/docs/components/label
+
 ### MediaUpload/UploadIcon
 
 ```tsx
