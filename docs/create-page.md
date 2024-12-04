@@ -131,19 +131,15 @@ Create the following hooks:
 "use client";
 
 import { useState } from "react";
-import { useAccount, useSwitchChain } from "wagmi";
-import { useWriteContracts } from "wagmi/experimental";
-import { CHAIN_ID, PROFILE_APP_URL } from "@/lib/consts";
-import useCreateSuccess from "@/hooks/useCreateSuccess";
-import { toast } from "react-toastify";
-import { useParams, useRouter } from "next/navigation";
+import { useAccount, useSwitchChain, useWriteContract } from "wagmi";
+import { CHAIN_ID } from "@/lib/consts";
+import { useParams } from "next/navigation";
 import { Address } from "viem";
 import useZoraCreateParameters from "./useZoraCreateParameters";
 
 export default function useZoraCreate() {
-  const { push } = useRouter();
   const { address } = useAccount();
-  const { data: callsStatusId, writeContractAsync } = useWriteContracts();
+  const { writeContractAsync } = useWriteContract();
   const { switchChainAsync } = useSwitchChain();
   const [creating, setCreating] = useState<boolean>(false);
   const params = useParams();
@@ -152,12 +148,6 @@ export default function useZoraCreate() {
   const { fetchParameters, createMetadata } = useZoraCreateParameters(
     chainId,
     collection
-  );
-
-  useCreateSuccess(
-    callsStatusId,
-    () => push(`${PROFILE_APP_URL}/${address}`),
-    !!params.collection
   );
 
   const create = async () => {
@@ -175,11 +165,10 @@ export default function useZoraCreate() {
 
       await writeContractAsync({
         ...parameters,
-      } as any);
+      });
     } catch (err) {
       setCreating(false);
-      toast.error("Couldn't create contract");
-      console.log(err.message);
+      console.error(err);
     }
   };
 
