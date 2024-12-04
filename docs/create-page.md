@@ -65,12 +65,7 @@ First, create the necessary providers:
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactNode } from "react";
 import { base } from "wagmi/chains";
-import {
-  createConfig,
-  WagmiConfig,
-  http,
-  WagmiProvider as WProvider,
-} from "wagmi";
+import { createConfig, http, WagmiProvider as WProvider } from "wagmi";
 
 const queryClient = new QueryClient();
 
