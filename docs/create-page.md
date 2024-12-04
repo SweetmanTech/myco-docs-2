@@ -59,7 +59,7 @@ module.exports = {
 
 First, create the necessary providers:
 
-### `providers/WagmiProvider.tsx`
+### WagmiProvider
 
 ```tsx
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -85,7 +85,7 @@ const WagmiProvider = ({ children }: { children: ReactNode }) => (
 export { WagmiProvider };
 ```
 
-### `providers/ZoraCreateProvider.tsx`
+### ZoraCreateProvider
 
 ```tsx
 "use client";
@@ -125,7 +125,7 @@ export { ZoraCreateProvider, useZoraCreateProvider };
 
 Create the following hooks:
 
-### `hooks/useZoraCreate.tsx`
+### useZoraCreate
 
 ```tsx
 "use client";
@@ -176,7 +176,7 @@ export default function useZoraCreate() {
 }
 ```
 
-### `hooks/useZoraCreateParameters.tsx`
+### useZoraCreateParameters
 
 ```tsx
 import { createCreatorClient } from "@zoralabs/protocol-sdk";
@@ -246,7 +246,7 @@ const useZoraCreateParameters = (
 export default useZoraCreateParameters;
 ```
 
-### `hooks/useCreateMetadata.tsx`
+### useCreateMetadata
 
 ```tsx
 import { uploadJson } from "@/lib/ipfs/uploadJson";
@@ -289,7 +289,7 @@ const useCreateMetadata = () => {
 export default useCreateMetadata;
 ```
 
-### `hooks/useFileUpload.tsx`
+### useFileUpload
 
 ```tsx
 import { MAX_FILE_SIZE, ONE_MB } from "@/lib/consts";
@@ -355,7 +355,7 @@ export default useFileUpload;
 
 First, create some utility components:
 
-### `components/ui/spinner.tsx`
+### ui/spinner
 
 ```tsx
 export default function Spinner() {
@@ -365,26 +365,7 @@ export default function Spinner() {
 }
 ```
 
-### `lib/utils.ts`
-
-```ts
-import { clsx, type ClassValue } from "clsx";
-import { twMerge } from "tailwind-merge";
-
-export function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs));
-}
-
-export function getIpfsLink(uri?: string) {
-  if (!uri) return "";
-  if (uri.startsWith("ipfs://")) {
-    return uri.replace("ipfs://", "https://ipfs.io/ipfs/");
-  }
-  return uri;
-}
-```
-
-### `components/MediaUpload/NoFileSelected.tsx`
+### MediaUpload/NoFileSelected.tsx
 
 ```tsx
 import UploadIcon from "../Icons/UploadIcon";
@@ -402,7 +383,7 @@ const NoFileSelected = ({ onClick }) => (
 export default NoFileSelected;
 ```
 
-### `components/MediaUpload/AudioPlayer.tsx`
+### MediaUpload/AudioPlayer
 
 ```tsx
 import getIpfsLink from "@/lib/ipfs/getIpfsLink";
@@ -490,7 +471,7 @@ const AudioPlayer = ({ onClick }) => {
 export default AudioPlayer;
 ```
 
-### `components/MediaUpload/MediaUpload.tsx`
+### MediaUpload/MediaUpload
 
 ```tsx
 import { useZoraCreateProvider } from "@/providers/ZoraCreateProvider";
@@ -629,7 +610,7 @@ export default function CreatePage() {
 
 Finally, wrap your application with the providers:
 
-### `app/layout.tsx`
+### layout
 
 ```tsx
 import { WagmiProvider } from "@/providers/WagmiProvider";
@@ -659,7 +640,26 @@ These providers and components set up:
 
 ## Libs
 
-### `app/lib/consts.tsx`
+### utils
+
+```ts
+import { clsx, type ClassValue } from "clsx";
+import { twMerge } from "tailwind-merge";
+
+export function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs));
+}
+
+export function getIpfsLink(uri?: string) {
+  if (!uri) return "";
+  if (uri.startsWith("ipfs://")) {
+    return uri.replace("ipfs://", "https://ipfs.io/ipfs/");
+  }
+  return uri;
+}
+```
+
+### consts
 
 ```tsx
 import { base } from "wagmi/chains";
@@ -673,7 +673,7 @@ export const ONE_MB = 1024 * 1024;
 export const MAX_FILE_SIZE = 5 * ONE_MB;
 ```
 
-### `lib/zora/getSalesConfig.tsx`
+### zora/getSalesConfig
 
 ```tsx
 import {
