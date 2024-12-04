@@ -152,3 +152,94 @@ Apply your brand colors and styling:
   }}
 />
 ```
+
+## Examples
+
+### Basic Implementation
+
+```tsx
+import { CreatePage } from "@myco/create";
+
+export default function CreateToken() {
+  const handleSuccess = (tokenId: string) => {
+    console.log(`Token ${tokenId} created successfully!`);
+  };
+
+  return (
+    <CreatePage onSuccess={handleSuccess} className="max-w-4xl mx-auto p-8" />
+  );
+}
+```
+
+### Pre-filled Values
+
+```tsx
+import { CreatePage } from "@myco/create";
+
+export default function CreateCollectionToken() {
+  return (
+    <CreatePage
+      defaultValues={{
+        name: "My Collection",
+        symbol: "MYCOL",
+        sellerFeeBasisPoints: 500, // 5%
+      }}
+    />
+  );
+}
+```
+
+### Custom Success Handler
+
+```tsx
+import { CreatePage } from "@myco/create";
+import { useRouter } from "next/navigation";
+
+export default function CreateWithRedirect() {
+  const router = useRouter();
+
+  const handleSuccess = (tokenId: string) => {
+    router.push(`/collection/${tokenId}`);
+  };
+
+  return <CreatePage onSuccess={handleSuccess} />;
+}
+```
+
+## Troubleshooting
+
+### Common Issues
+
+#### Wallet Connection Issues
+
+If you're experiencing wallet connection problems:
+
+1. Ensure you've set up the `NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID` environment variable
+2. Check that the `WagmiProvider` is properly configured
+3. Verify that your wallet is connected to the correct network
+
+#### Transaction Failures
+
+If token creation transactions are failing:
+
+1. Ensure the user has enough ETH for gas fees
+2. Check that all required fields are properly filled
+3. Verify network connectivity
+
+#### Styling Issues
+
+If the component styling doesn't match your design:
+
+1. Verify that Tailwind CSS is properly configured
+2. Check that the content array in `tailwind.config.js` includes the component path
+3. Ensure your theme configuration is properly structured
+
+### Getting Help
+
+- Check the [GitHub repository](https://github.com/sweetmantech/myco-create) for known issues
+- Join our [Discord community](https://discord.gg/myco) for support
+- Submit bug reports through GitHub Issues
+
+## Contributing
+
+We welcome contributions! Please see our [Contributing Guide](https://github.com/sweetmantech/myco-create/CONTRIBUTING.md) for details on how to get started.
