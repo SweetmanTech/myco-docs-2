@@ -22,7 +22,7 @@ The `<CreatePage />` component is a beautifully designed, ready-to-use component
 ## Installation
 
 ```bash
-npm install wagmi viem @zoralabs/protocol-sdk @zoralabs/protocol-deployments clsx tailwind-merge @tanstack/react-query
+npm install wagmi viem @zoralabs/protocol-sdk @zoralabs/protocol-deployments clsx tailwind-merge @tanstack/react-query crypto
 ```
 
 ## Required Setup
@@ -52,8 +52,6 @@ module.exports = {
   plugins: [],
 };
 ```
-
-## Create Required Files
 
 ## Providers
 
@@ -697,6 +695,94 @@ const getSalesConfig = (saleStrategy: string) => {
 };
 
 export default getSalesConfig;
+```
+
+### ipfs/uploadJson
+
+```tsx
+import { IPFSUploadResponse, uploadFile } from "./uploadFile";
+
+export async function uploadJson(json: object): Promise<IPFSUploadResponse> {
+  const jsonString = JSON.stringify(json);
+  const file = new File([jsonString], "upload.json", {
+    type: "application/json",
+  });
+  return await uploadFile(file);
+}
+```
+
+### ipfs/uploadFile
+
+```tsx
+import { hashFiles } from "./hash";
+
+export type IPFSUploadResponse = {
+  cid: string;
+  uri: string;
+};
+
+const uploadCache = {
+  prefix: "Pinata/IPFSUploadCache",
+  get(files: File[]): IPFSUploadResponse | undefined {
+    const digest = hashFiles(files);
+    try {
+      const cid = localStorage.getItem(`${this.prefix}/${digest}`);
+      if (cid) {
+        return { cid, uri: `ipfs://${cid}` };
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  },
+  put(files: File[], cid: string) {
+    const digest = hashFiles(files);
+    try {
+      localStorage.setItem(`${this.prefix}/${digest}`, cid);
+    } catch (error) {
+      console.error(error);
+    }
+  },
+};
+
+export const uploadFile = async (file: File): Promise<IPFSUploadResponse> => {
+  try {
+    const data = new FormData();
+    data.set("file", file);
+    const cached = uploadCache.get([file]);
+    if (cached) return cached;
+    const res = await fetch("/api/ipfs", {
+      method: "POST",
+      body: data,
+    });
+    const json = await res.json();
+    const { cid } = json;
+    uploadCache.put([file], cid);
+    return { cid, uri: `ipfs://${cid}` };
+  } catch (error) {
+    console.error(error);
+    return { cid: "", uri: "" };
+  }
+};
+```
+
+### ipfs/hash
+
+```tsx
+import * as crypto from "crypto";
+
+export function hashFiles(files: File[]): string {
+  const hash = crypto.createHash("sha256");
+  for (const file of files) {
+    const simplifiedFile = {
+      name: file.name,
+      lastModified: file.lastModified,
+      size: file.size,
+      type: file.type,
+    };
+    hash.update(JSON.stringify(simplifiedFile));
+  }
+  return `0x${hash.digest("hex")}`;
+}
 ```
 
 ## Basic Usage
