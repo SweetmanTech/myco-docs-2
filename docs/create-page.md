@@ -352,12 +352,10 @@ export default useFileUpload;
 ### useConnectWallet
 
 ```tsx
-import { useEffect } from "react";
-import { useAccount, useConnect } from "wagmi";
+import { useConnect } from "wagmi";
 
 const useConnectWallet = () => {
   const { connectors, connectAsync } = useConnect();
-  const { address } = useAccount();
   const connector = connectors[0];
 
   const connectWallet = () => connectAsync({ connector });
@@ -619,7 +617,7 @@ export default MediaUpload;
 
 import { useAccount, useDisconnect } from "wagmi";
 import useConnectWallet from "@/hooks/useConnectWallet";
-import Button from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 
 export default function LoginButton() {
   const { status } = useAccount();
@@ -630,10 +628,60 @@ export default function LoginButton() {
     return <Button disabled>Loading...</Button>;
 
   if (status === "connected")
-    return <Button onClick={disconnect}>Disconnect</Button>;
+    return <Button onClick={() => disconnect()}>Disconnect</Button>;
 
   return <Button onClick={connectWallet}>Connect</Button>;
 }
+```
+
+### CreatePage/Title
+
+```tsx
+import { useZoraCreateProvider } from "@/providers/ZoraCreateProvider";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+
+const Title = () => {
+  const { name, setName } = useZoraCreateProvider();
+
+  return (
+    <div className="flex flex-col items-start w-full">
+      <Label htmlFor="title">Title</Label>
+      <Input
+        id="title"
+        value={name}
+        onChange={(e) => setName(e.target.value)}
+        className="border border-black py-7 text-xl"
+      />
+    </div>
+  );
+};
+
+export default Title;
+```
+
+### CreatePage/CreateButton
+
+```tsx
+"use client";
+
+import { Button } from "@/components/ui/button";
+import { useZoraCreateProvider } from "@/providers/ZoraCreateProvider";
+
+const CreateButton = ({ children }: any) => {
+  const { create } = useZoraCreateProvider();
+
+  return (
+    <Button
+      onClick={() => create()}
+      className="bg-white text-black p-3 transform hover:scale-105 transition-transform duration-150 hover:shadow-lg"
+    >
+      {children}
+    </Button>
+  );
+};
+
+export default CreateButton;
 ```
 
 ### CreatePage/CreatePage
@@ -644,10 +692,10 @@ export default function LoginButton() {
 import { useAccount } from "wagmi";
 import { useZoraCreateProvider } from "@/providers/ZoraCreateProvider";
 import Spinner from "@/components/ui/spinner";
-import MediaUpload from "@components/MediaUpload/MediaUpload";
+import MediaUpload from "@/components/MediaUpload/MediaUpload";
 import LoginButton from "./LoginButton";
 import Title from "./Title";
-import CreateButtons from "./CreateButtons";
+import CreateButton from "./CreateButton";
 
 export default function CreatePage() {
   const { creating, name } = useZoraCreateProvider();
@@ -673,7 +721,7 @@ export default function CreatePage() {
             <div className="w-full flex flex-col items-start gap-4">
               <Title />
             </div>
-            {address ? <CreateButtons /> : <LoginButton />}
+            {address ? <CreateButton /> : <LoginButton />}
           </div>
         )}
       </div>
