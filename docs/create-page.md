@@ -205,9 +205,195 @@ async function uploadToStorage(file: File): Promise<string> {
 
 #### Components
 
-Now create the main component:
+First, create some utility components:
 
-##### `components/create-page.tsx`
+##### `components/ui/spinner.tsx`
+
+```tsx
+export default function Spinner() {
+  return (
+    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-black" />
+  );
+}
+```
+
+##### `lib/utils.ts`
+
+```ts
+import { clsx, type ClassValue } from "clsx";
+import { twMerge } from "tailwind-merge";
+
+export function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs));
+}
+
+export function getIpfsLink(uri?: string) {
+  if (!uri) return "";
+  if (uri.startsWith("ipfs://")) {
+    return uri.replace("ipfs://", "https://ipfs.io/ipfs/");
+  }
+  return uri;
+}
+```
+
+##### `components/media-upload/no-file-selected.tsx`
+
+```tsx
+interface NoFileSelectedProps {
+  onClick: () => void;
+}
+
+export default function NoFileSelected({ onClick }: NoFileSelectedProps) {
+  return (
+    <div
+      onClick={onClick}
+      className="absolute inset-0 flex flex-col items-center justify-center cursor-pointer"
+    >
+      <svg
+        className="w-8 h-8 mb-4 text-gray-500"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+      >
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth={2}
+          d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+        />
+      </svg>
+      <span className="text-gray-500">Click to upload media</span>
+    </div>
+  );
+}
+```
+
+##### `components/media-upload/audio-player.tsx`
+
+```tsx
+interface AudioPlayerProps {
+  onClick: () => void;
+}
+
+export default function AudioPlayer({ onClick }: AudioPlayerProps) {
+  return (
+    <div
+      onClick={onClick}
+      className="absolute inset-0 flex items-center justify-center cursor-pointer"
+    >
+      <svg
+        className="w-16 h-16 text-gray-500"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+      >
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth={2}
+          d="M9 19V5l12 7-12 7z"
+        />
+      </svg>
+    </div>
+  );
+}
+```
+
+##### `components/media-upload/media-upload.tsx`
+
+```tsx
+"use client";
+
+import { useZoraCreate } from "@/providers/zora-create-provider";
+import { useMediaUpload } from "@/hooks/use-media-upload";
+import { cn, getIpfsLink } from "@/lib/utils";
+import Spinner from "@/components/ui/spinner";
+import { useRef } from "react";
+import NoFileSelected from "./no-file-selected";
+import AudioPlayer from "./audio-player";
+import Image from "next/image";
+
+export default function MediaUpload() {
+  const { imageUri, animationUri, mimeType } = useZoraCreate();
+  const {
+    uploadMedia: fileUpload,
+    isUploading: loading,
+    error,
+    blurImageUrl,
+  } = useMediaUpload();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleImageClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const renderMedia = () => {
+    if (loading) {
+      return (
+        <div className="absolute inset-0 flex items-center justify-center left-0 top-0">
+          <Spinner />
+        </div>
+      );
+    }
+
+    if (mimeType?.includes("audio")) {
+      return <AudioPlayer onClick={handleImageClick} />;
+    }
+
+    if (mimeType?.includes("video")) {
+      return (
+        <video controls className="w-full rounded-md">
+          <source src={getIpfsLink(animationUri)} type={mimeType} />
+          Your browser does not support the video element.
+        </video>
+      );
+    }
+
+    if (imageUri) {
+      return (
+        <div className="relative w-[296px] h-[296px]">
+          <Image
+            src={blurImageUrl || getIpfsLink(imageUri)}
+            className="w-full h-auto rounded-md cursor-pointer object-contain absolute"
+            alt="Image Preview"
+            onClick={handleImageClick}
+            blurDataURL={blurImageUrl}
+            fill
+          />
+        </div>
+      );
+    }
+
+    return <NoFileSelected onClick={handleImageClick} />;
+  };
+
+  return (
+    <div className="grid w-full max-w-3xl items-center gap-4">
+      <div
+        className={cn(
+          "w-full relative rounded-md min-h-[300px] min-w-[300px]",
+          !imageUri && !animationUri && "aspect-square",
+          (loading || (!imageUri && !animationUri)) &&
+            "border-dashed border-2 border-black"
+        )}
+      >
+        <input
+          ref={fileInputRef}
+          id="media"
+          type="file"
+          className="hidden"
+          onChange={fileUpload}
+          accept="image/*,video/*,audio/*"
+        />
+        {renderMedia()}
+      </div>
+      {error && <p className="text-red-500 text-sm mt-2">{error.message}</p>}
+    </div>
+  );
+}
+```
+
+Now update the `CreatePage` component to use `MediaUpload`:
 
 ```tsx
 "use client";
@@ -290,6 +476,13 @@ export function CreatePage({
       <form onSubmit={handleSubmit} className="space-y-6">
         <div>
           <label className="block text-sm font-medium text-gray-700">
+            Media
+            <MediaUpload />
+          </label>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700">
             Name
             <input
               type="text"
@@ -330,18 +523,6 @@ export function CreatePage({
                 }))
               }
               className="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
-            />
-          </label>
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700">
-            Media
-            <input
-              type="file"
-              onChange={handleMediaChange}
-              className="mt-1 block w-full"
-              accept="image/*,video/*,audio/*"
             />
           </label>
         </div>
