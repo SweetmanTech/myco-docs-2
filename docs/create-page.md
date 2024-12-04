@@ -420,9 +420,9 @@ export default NoFileSelected;
 import { getIpfsLink } from "@/lib/utils";
 import { useZoraCreateProvider } from "@/providers/ZoraCreateProvider";
 import { useRef, useState } from "react";
-import Button from "../ui/Button";
-import { Slider } from "../ui/Slider";
+import { Button } from "../ui/button";
 import { Pause, Play } from "lucide-react";
+import { Slider } from "../ui/slider";
 
 const AudioPlayer = ({ onClick }) => {
   const { imageUri, animationUri } = useZoraCreateProvider();
