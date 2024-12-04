@@ -22,7 +22,7 @@ The `<CreatePage />` component is a beautifully designed, ready-to-use component
 ## Installation
 
 ```bash
-npm install @myco/create wagmi viem @zoralabs/zora-721-contracts
+npm install wagmi viem @zoralabs/zora-721-contracts
 ```
 
 ## Required Setup
@@ -44,7 +44,7 @@ Ensure Tailwind CSS is installed and configured in your project. Add the followi
 module.exports = {
   content: [
     // ... your existing content
-    "./node_modules/@myco/create/**/*.{js,ts,jsx,tsx}",
+    "./components/**/*.{js,ts,jsx,tsx}",
   ],
   theme: {
     extend: {},
@@ -53,145 +53,97 @@ module.exports = {
 };
 ```
 
-### 3. Provider Setup
+### 3. Create the Components
 
-Create the following files in your project:
-
-#### `providers/wagmi-provider.tsx`
+#### `components/create-page.tsx`
 
 ```tsx
 "use client";
 
-import { createConfig, WagmiConfig, http } from "wagmi";
-import { base } from "wagmi/chains";
+import { useZoraCreate } from "@/providers/zora-create-provider";
+import { useState } from "react";
 
-const config = createConfig({
-  chains: [base],
-  transports: {
-    [base.id]: http(),
-  },
-});
-
-export function WagmiProvider({ children }: { children: React.ReactNode }) {
-  return <WagmiConfig config={config}>{children}</WagmiConfig>;
-}
-```
-
-#### `providers/zora-create-provider.tsx`
-
-```tsx
-"use client";
-
-import { createPublicClient, http } from "viem";
-import { base } from "viem/chains";
-import { createContext, useContext, useState } from "react";
-import { zoraCreator721Factory } from "@zoralabs/zora-721-contracts";
-
-interface ZoraCreateContextType {
-  createToken: (params: CreateTokenParams) => Promise<string>;
-  isLoading: boolean;
-  error: Error | null;
+interface CreatePageProps {
+  className?: string;
+  onSuccess?: (tokenId: string) => void;
+  defaultValues?: CreatePageDefaultValues;
+  theme?: CreatePageTheme;
 }
 
-interface CreateTokenParams {
-  name: string;
-  symbol: string;
+interface CreatePageDefaultValues {
+  name?: string;
   description?: string;
+  symbol?: string;
   sellerFeeBasisPoints?: number;
-  mediaUrl?: string;
 }
 
-const ZoraCreateContext = createContext<ZoraCreateContextType>({
-  createToken: async () => "",
-  isLoading: false,
-  error: null,
-});
+interface CreatePageTheme {
+  colors?: {
+    primary?: string;
+    secondary?: string;
+    accent?: string;
+    background?: string;
+  };
+  borderRadius?: string;
+  fontFamily?: string;
+}
 
-export function ZoraCreateProvider({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<Error | null>(null);
+export function CreatePage({
+  className = "",
+  onSuccess,
+  defaultValues,
+  theme,
+}: CreatePageProps) {
+  const { createToken, isLoading, error } = useZoraCreate();
+  const [mediaUrl, setMediaUrl] = useState("");
 
-  const publicClient = createPublicClient({
-    chain: base,
-    transport: http(),
-  });
-
-  const createToken = async (params: CreateTokenParams) => {
-    setIsLoading(true);
-    setError(null);
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
     try {
-      const { hash } = await publicClient.writeContract({
-        ...zoraCreator721Factory,
-        functionName: "createToken",
-        args: [
-          params.name,
-          params.symbol,
-          params.description || "",
-          params.sellerFeeBasisPoints || 0,
-          params.mediaUrl || "",
-        ],
+      const tokenId = await createToken({
+        name: defaultValues?.name || "My Token",
+        symbol: defaultValues?.symbol || "TOKEN",
+        description: defaultValues?.description,
+        sellerFeeBasisPoints: defaultValues?.sellerFeeBasisPoints || 0,
+        mediaUrl,
       });
-      const receipt = await publicClient.waitForTransactionReceipt({ hash });
-      return receipt.transactionHash;
+      onSuccess?.(tokenId);
     } catch (err) {
-      setError(err as Error);
-      throw err;
-    } finally {
-      setIsLoading(false);
+      console.error("Failed to create token:", err);
     }
   };
 
   return (
-    <ZoraCreateContext.Provider value={{ createToken, isLoading, error }}>
-      {children}
-    </ZoraCreateContext.Provider>
-  );
-}
-
-export const useZoraCreate = () => useContext(ZoraCreateContext);
-```
-
-Then wrap your application with these providers:
-
-#### `app/layout.tsx`
-
-```tsx
-import { WagmiProvider } from "@/providers/wagmi-provider";
-import { ZoraCreateProvider } from "@/providers/zora-create-provider";
-
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
-  return (
-    <WagmiProvider>
-      <ZoraCreateProvider>{children}</ZoraCreateProvider>
-    </WagmiProvider>
+    <div className={className}>
+      <form onSubmit={handleSubmit} className="space-y-6">
+        {/* Add your form fields here */}
+        <button
+          type="submit"
+          disabled={isLoading}
+          className="bg-blue-500 text-white px-4 py-2 rounded"
+        >
+          {isLoading ? "Creating..." : "Create Token"}
+        </button>
+        {error && <p className="text-red-500">{error.message}</p>}
+      </form>
+    </div>
   );
 }
 ```
-
-These providers set up:
-
-- Wallet connection handling with Wagmi
-- Zora contract interactions
-- Loading and error states
-- Type-safe context for token creation
 
 ## Basic Usage
 
-The simplest way to use the `<CreatePage />` component:
-
 ```tsx
-import { CreatePage } from "@myco/create";
+import { CreatePage } from "@/components/create-page";
 
 export default function Create() {
-  return <CreatePage />;
+  const handleSuccess = (tokenId: string) => {
+    console.log(`Token ${tokenId} created successfully!`);
+  };
+
+  return (
+    <CreatePage onSuccess={handleSuccess} className="max-w-4xl mx-auto p-8" />
+  );
 }
 ```
 
@@ -284,7 +236,7 @@ export default function CreateToken() {
 ### Pre-filled Values
 
 ```tsx
-import { CreatePage } from "@myco/create";
+import { CreatePage } from "@/components/create-page";
 
 export default function CreateCollectionToken() {
   return (
@@ -302,7 +254,7 @@ export default function CreateCollectionToken() {
 ### Custom Success Handler
 
 ```tsx
-import { CreatePage } from "@myco/create";
+import { CreatePage } from "@/components/create-page";
 import { useRouter } from "next/navigation";
 
 export default function CreateWithRedirect() {
