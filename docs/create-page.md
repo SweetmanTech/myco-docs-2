@@ -55,10 +55,113 @@ module.exports = {
 
 ### 3. Provider Setup
 
-Wrap your application with the required providers:
+Create the following files in your project:
+
+#### `providers/wagmi-provider.tsx`
 
 ```tsx
-import { WagmiProvider, ZoraCreateProvider } from "@myco/create";
+"use client";
+
+import { createConfig, WagmiConfig, http } from "wagmi";
+import { mainnet } from "wagmi/chains";
+
+const config = createConfig({
+  chains: [mainnet],
+  transports: {
+    [mainnet.id]: http(),
+  },
+});
+
+export function WagmiProvider({ children }: { children: React.ReactNode }) {
+  return <WagmiConfig config={config}>{children}</WagmiConfig>;
+}
+```
+
+#### `providers/zora-create-provider.tsx`
+
+```tsx
+"use client";
+
+import { createPublicClient, http } from "viem";
+import { mainnet } from "viem/chains";
+import { createContext, useContext, useState } from "react";
+import { zoraCreator721Factory } from "@zoralabs/zora-721-contracts";
+
+interface ZoraCreateContextType {
+  createToken: (params: CreateTokenParams) => Promise<string>;
+  isLoading: boolean;
+  error: Error | null;
+}
+
+interface CreateTokenParams {
+  name: string;
+  symbol: string;
+  description?: string;
+  sellerFeeBasisPoints?: number;
+  mediaUrl?: string;
+}
+
+const ZoraCreateContext = createContext<ZoraCreateContextType>({
+  createToken: async () => "",
+  isLoading: false,
+  error: null,
+});
+
+export function ZoraCreateProvider({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<Error | null>(null);
+
+  const publicClient = createPublicClient({
+    chain: mainnet,
+    transport: http(),
+  });
+
+  const createToken = async (params: CreateTokenParams) => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const { hash } = await publicClient.writeContract({
+        ...zoraCreator721Factory,
+        functionName: "createToken",
+        args: [
+          params.name,
+          params.symbol,
+          params.description || "",
+          params.sellerFeeBasisPoints || 0,
+          params.mediaUrl || "",
+        ],
+      });
+      const receipt = await publicClient.waitForTransactionReceipt({ hash });
+      return receipt.transactionHash;
+    } catch (err) {
+      setError(err as Error);
+      throw err;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <ZoraCreateContext.Provider value={{ createToken, isLoading, error }}>
+      {children}
+    </ZoraCreateContext.Provider>
+  );
+}
+
+export const useZoraCreate = () => useContext(ZoraCreateContext);
+```
+
+Then wrap your application with these providers:
+
+#### `app/layout.tsx`
+
+```tsx
+import { WagmiProvider } from "@/providers/wagmi-provider";
+import { ZoraCreateProvider } from "@/providers/zora-create-provider";
 
 export default function RootLayout({
   children,
@@ -72,6 +175,13 @@ export default function RootLayout({
   );
 }
 ```
+
+These providers set up:
+
+- Wallet connection handling with Wagmi
+- Zora contract interactions
+- Loading and error states
+- Type-safe context for token creation
 
 ## Basic Usage
 
