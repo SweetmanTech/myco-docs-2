@@ -59,7 +59,7 @@ module.exports = {
 
 First, create the necessary providers:
 
-##### `providers/WagmiProvider.tsx`
+#### `providers/WagmiProvider.tsx`
 
 ```tsx
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -85,7 +85,7 @@ const WagmiProvider = ({ children }: { children: ReactNode }) => (
 export { WagmiProvider };
 ```
 
-##### `providers/ZoraCreateProvider.tsx`
+#### `providers/ZoraCreateProvider.tsx`
 
 ```tsx
 "use client";
@@ -125,7 +125,7 @@ export { ZoraCreateProvider, useZoraCreateProvider };
 
 Create the following hooks:
 
-##### `hooks/useZoraCreate.tsx`
+#### `hooks/useZoraCreate.tsx`
 
 ```tsx
 "use client";
@@ -176,7 +176,7 @@ export default function useZoraCreate() {
 }
 ```
 
-##### `hooks/useZoraCreateParameters.tsx`
+#### `hooks/useZoraCreateParameters.tsx`
 
 ```tsx
 import { createCreatorClient } from "@zoralabs/protocol-sdk";
@@ -246,7 +246,7 @@ const useZoraCreateParameters = (
 export default useZoraCreateParameters;
 ```
 
-##### `hooks/useFileUpload.tsx`
+#### `hooks/useFileUpload.tsx`
 
 ```tsx
 import { MAX_FILE_SIZE, ONE_MB } from "@/lib/consts";
@@ -312,7 +312,7 @@ export default useFileUpload;
 
 First, create some utility components:
 
-##### `components/ui/spinner.tsx`
+#### `components/ui/spinner.tsx`
 
 ```tsx
 export default function Spinner() {
@@ -322,7 +322,7 @@ export default function Spinner() {
 }
 ```
 
-##### `lib/utils.ts`
+#### `lib/utils.ts`
 
 ```ts
 import { clsx, type ClassValue } from "clsx";
@@ -341,7 +341,7 @@ export function getIpfsLink(uri?: string) {
 }
 ```
 
-##### `components/MediaUpload/NoFileSelected.tsx`
+#### `components/MediaUpload/NoFileSelected.tsx`
 
 ```tsx
 import UploadIcon from "../Icons/UploadIcon";
@@ -359,7 +359,7 @@ const NoFileSelected = ({ onClick }) => (
 export default NoFileSelected;
 ```
 
-##### `components/MediaUpload/AudioPlayer.tsx`
+#### `components/MediaUpload/AudioPlayer.tsx`
 
 ```tsx
 import getIpfsLink from "@/lib/ipfs/getIpfsLink";
@@ -447,7 +447,7 @@ const AudioPlayer = ({ onClick }) => {
 export default AudioPlayer;
 ```
 
-##### `components/MediaUpload/MediaUpload.tsx`
+#### `components/MediaUpload/MediaUpload.tsx`
 
 ```tsx
 import { useZoraCreateProvider } from "@/providers/ZoraCreateProvider";
@@ -586,7 +586,7 @@ export default function CreatePage() {
 
 Finally, wrap your application with the providers:
 
-##### `app/layout.tsx`
+#### `app/layout.tsx`
 
 ```tsx
 import { WagmiProvider } from "@/providers/WagmiProvider";
@@ -616,7 +616,7 @@ These providers and components set up:
 
 ### Libs
 
-##### `app/const.tsx`
+#### `app/const.tsx`
 
 ```tsx
 import { base } from "wagmi/chains";
