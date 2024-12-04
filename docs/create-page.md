@@ -53,14 +53,168 @@ module.exports = {
 };
 ```
 
-### 3. Create the Components
+### 3. Create Required Files
 
-#### `components/create-page.tsx`
+#### Providers
+
+First, create the necessary providers:
+
+##### `providers/wagmi-provider.tsx`
+
+```tsx
+"use client";
+
+import { createConfig, WagmiConfig, http } from "wagmi";
+import { base } from "wagmi/chains";
+
+const config = createConfig({
+  chains: [base],
+  transports: {
+    [base.id]: http(),
+  },
+});
+
+export function WagmiProvider({ children }: { children: React.ReactNode }) {
+  return <WagmiConfig config={config}>{children}</WagmiConfig>;
+}
+```
+
+##### `providers/zora-create-provider.tsx`
+
+```tsx
+"use client";
+
+import { createPublicClient, http } from "viem";
+import { base } from "viem/chains";
+import { createContext, useContext, useState } from "react";
+import { zoraCreator721Factory } from "@zoralabs/zora-721-contracts";
+
+interface ZoraCreateContextType {
+  createToken: (params: CreateTokenParams) => Promise<string>;
+  isLoading: boolean;
+  error: Error | null;
+}
+
+interface CreateTokenParams {
+  name: string;
+  symbol: string;
+  description?: string;
+  sellerFeeBasisPoints?: number;
+  mediaUrl?: string;
+}
+
+const ZoraCreateContext = createContext<ZoraCreateContextType>({
+  createToken: async () => "",
+  isLoading: false,
+  error: null,
+});
+
+export function ZoraCreateProvider({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<Error | null>(null);
+
+  const publicClient = createPublicClient({
+    chain: base,
+    transport: http(),
+  });
+
+  const createToken = async (params: CreateTokenParams) => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const { hash } = await publicClient.writeContract({
+        ...zoraCreator721Factory,
+        functionName: "createToken",
+        args: [
+          params.name,
+          params.symbol,
+          params.description || "",
+          params.sellerFeeBasisPoints || 0,
+          params.mediaUrl || "",
+        ],
+      });
+      const receipt = await publicClient.waitForTransactionReceipt({ hash });
+      return receipt.transactionHash;
+    } catch (err) {
+      setError(err as Error);
+      throw err;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <ZoraCreateContext.Provider value={{ createToken, isLoading, error }}>
+      {children}
+    </ZoraCreateContext.Provider>
+  );
+}
+
+export const useZoraCreate = () => useContext(ZoraCreateContext);
+```
+
+#### Hooks
+
+Create the following hooks:
+
+##### `hooks/use-media-upload.tsx`
+
+```tsx
+"use client";
+
+import { useState } from "react";
+
+interface UseMediaUploadResult {
+  uploadMedia: (file: File) => Promise<string>;
+  isUploading: boolean;
+  error: Error | null;
+}
+
+export function useMediaUpload(): UseMediaUploadResult {
+  const [isUploading, setIsUploading] = useState(false);
+  const [error, setError] = useState<Error | null>(null);
+
+  const uploadMedia = async (file: File): Promise<string> => {
+    setIsUploading(true);
+    setError(null);
+    try {
+      // Implement your media upload logic here
+      // This could be to IPFS, Arweave, or your preferred storage
+      const url = await uploadToStorage(file);
+      return url;
+    } catch (err) {
+      setError(err as Error);
+      throw err;
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  return { uploadMedia, isUploading, error };
+}
+
+// Example implementation - replace with your preferred storage solution
+async function uploadToStorage(file: File): Promise<string> {
+  // Implement your storage upload logic here
+  return "https://example.com/media/1234";
+}
+```
+
+#### Components
+
+Now create the main component:
+
+##### `components/create-page.tsx`
 
 ```tsx
 "use client";
 
 import { useZoraCreate } from "@/providers/zora-create-provider";
+import { useMediaUpload } from "@/hooks/use-media-upload";
 import { useState } from "react";
 
 interface CreatePageProps {
@@ -94,17 +248,37 @@ export function CreatePage({
   defaultValues,
   theme,
 }: CreatePageProps) {
-  const { createToken, isLoading, error } = useZoraCreate();
+  const {
+    createToken,
+    isLoading: isCreating,
+    error: createError,
+  } = useZoraCreate();
+  const { uploadMedia, isUploading, error: uploadError } = useMediaUpload();
   const [mediaUrl, setMediaUrl] = useState("");
+  const [formData, setFormData] = useState({
+    name: defaultValues?.name || "",
+    symbol: defaultValues?.symbol || "",
+    description: defaultValues?.description || "",
+    sellerFeeBasisPoints: defaultValues?.sellerFeeBasisPoints || 0,
+  });
+
+  const handleMediaChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    try {
+      const url = await uploadMedia(file);
+      setMediaUrl(url);
+    } catch (err) {
+      console.error("Failed to upload media:", err);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
       const tokenId = await createToken({
-        name: defaultValues?.name || "My Token",
-        symbol: defaultValues?.symbol || "TOKEN",
-        description: defaultValues?.description,
-        sellerFeeBasisPoints: defaultValues?.sellerFeeBasisPoints || 0,
+        ...formData,
         mediaUrl,
       });
       onSuccess?.(tokenId);
@@ -116,20 +290,138 @@ export function CreatePage({
   return (
     <div className={className}>
       <form onSubmit={handleSubmit} className="space-y-6">
-        {/* Add your form fields here */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700">
+            Name
+            <input
+              type="text"
+              value={formData.name}
+              onChange={(e) =>
+                setFormData((prev) => ({ ...prev, name: e.target.value }))
+              }
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
+              required
+            />
+          </label>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700">
+            Symbol
+            <input
+              type="text"
+              value={formData.symbol}
+              onChange={(e) =>
+                setFormData((prev) => ({ ...prev, symbol: e.target.value }))
+              }
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
+              required
+            />
+          </label>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700">
+            Description
+            <textarea
+              value={formData.description}
+              onChange={(e) =>
+                setFormData((prev) => ({
+                  ...prev,
+                  description: e.target.value,
+                }))
+              }
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
+            />
+          </label>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700">
+            Royalty (%)
+            <input
+              type="number"
+              value={formData.sellerFeeBasisPoints / 100}
+              onChange={(e) =>
+                setFormData((prev) => ({
+                  ...prev,
+                  sellerFeeBasisPoints: Math.floor(
+                    parseFloat(e.target.value) * 100
+                  ),
+                }))
+              }
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
+              min="0"
+              max="100"
+              step="0.01"
+            />
+          </label>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700">
+            Media
+            <input
+              type="file"
+              onChange={handleMediaChange}
+              className="mt-1 block w-full"
+              accept="image/*,video/*,audio/*"
+            />
+          </label>
+        </div>
+
         <button
           type="submit"
-          disabled={isLoading}
-          className="bg-blue-500 text-white px-4 py-2 rounded"
+          disabled={isCreating || isUploading}
+          className="w-full px-4 py-2 text-white bg-blue-500 rounded-md hover:bg-blue-600 disabled:opacity-50"
         >
-          {isLoading ? "Creating..." : "Create Token"}
+          {isUploading
+            ? "Uploading..."
+            : isCreating
+            ? "Creating..."
+            : "Create Token"}
         </button>
-        {error && <p className="text-red-500">{error.message}</p>}
+
+        {(createError || uploadError) && (
+          <p className="text-red-500">
+            {createError?.message || uploadError?.message}
+          </p>
+        )}
       </form>
     </div>
   );
 }
 ```
+
+Finally, wrap your application with the providers:
+
+##### `app/layout.tsx`
+
+```tsx
+import { WagmiProvider } from "@/providers/wagmi-provider";
+import { ZoraCreateProvider } from "@/providers/zora-create-provider";
+
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <WagmiProvider>
+      <ZoraCreateProvider>{children}</ZoraCreateProvider>
+    </WagmiProvider>
+  );
+}
+```
+
+These providers and components set up:
+
+- Wallet connection handling with Wagmi
+- Zora contract interactions
+- Media upload functionality
+- Loading and error states
+- Type-safe context for token creation
+- Beautiful UI with Tailwind CSS
 
 ## Basic Usage
 
