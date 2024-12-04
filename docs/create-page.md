@@ -18,3 +18,57 @@ The `<CreatePage />` component is a beautifully designed, ready-to-use component
 ## Preview
 
 [Preview image coming soon]
+
+## Installation
+
+```bash
+npm install @myco/create wagmi viem @zoralabs/zora-721-contracts
+```
+
+## Required Setup
+
+### 1. Environment Variables
+
+Create a `.env.local` file in your project root:
+
+```bash
+NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID=your_project_id
+NEXT_PUBLIC_ALCHEMY_ID=your_alchemy_id
+```
+
+### 2. Tailwind CSS
+
+Ensure Tailwind CSS is installed and configured in your project. Add the following to your `tailwind.config.js`:
+
+```js
+module.exports = {
+  content: [
+    // ... your existing content
+    "./node_modules/@myco/create/**/*.{js,ts,jsx,tsx}",
+  ],
+  theme: {
+    extend: {},
+  },
+  plugins: [],
+};
+```
+
+### 3. Provider Setup
+
+Wrap your application with the required providers:
+
+```tsx
+import { WagmiProvider, ZoraCreateProvider } from "@myco/create";
+
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <WagmiProvider>
+      <ZoraCreateProvider>{children}</ZoraCreateProvider>
+    </WagmiProvider>
+  );
+}
+```
