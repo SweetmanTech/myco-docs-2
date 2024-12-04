@@ -22,7 +22,7 @@ The `<CreatePage />` component is a beautifully designed, ready-to-use component
 ## Installation
 
 ```bash
-npm install wagmi viem @zoralabs/protocol-deployments clsx tailwind-merge @tanstack/react-query
+npm install wagmi viem @zoralabs/protocol-sdk @zoralabs/protocol-deployments clsx tailwind-merge @tanstack/react-query
 ```
 
 ## Required Setup
@@ -616,7 +616,7 @@ These providers and components set up:
 
 ### Libs
 
-#### `app/consts.tsx`
+#### `app/lib/consts.tsx`
 
 ```tsx
 import { base } from "wagmi/chains";
@@ -628,6 +628,32 @@ export const REFERRAL_RECIPIENT = "0x749B7b7A6944d72266Be9500FC8C221B6A7554Ce";
 // IPFS
 export const ONE_MB = 1024 * 1024;
 export const MAX_FILE_SIZE = 5 * ONE_MB;
+```
+
+#### `lib/zora/getSalesConfig.tsx`
+
+```tsx
+import {
+  FixedPriceParamsType,
+  TimedSaleParamsType,
+} from "@zoralabs/protocol-sdk";
+
+const getSalesConfig = (saleStrategy: string) => {
+  const timedSaleConfig = {
+    type: "timed",
+    erc20Name: "CC0 Music",
+    erc20Symbol: "CC0",
+  } as TimedSaleParamsType;
+  const fixedPriceSaleConfig = {
+    type: "fixedPrice",
+    pricePerToken: BigInt(1),
+  } as FixedPriceParamsType;
+  return saleStrategy === "ZoraTimedSaleStrategy"
+    ? timedSaleConfig
+    : fixedPriceSaleConfig;
+};
+
+export default getSalesConfig;
 ```
 
 ## Basic Usage
