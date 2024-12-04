@@ -22,7 +22,7 @@ The `<CreatePage />` component is a beautifully designed, ready-to-use component
 ## Installation
 
 ```bash
-npm install wagmi viem @zoralabs/protocol-deployments
+npm install wagmi viem @zoralabs/protocol-deployments clsx tailwind-merge
 ```
 
 ## Required Setup
