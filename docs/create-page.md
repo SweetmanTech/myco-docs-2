@@ -119,6 +119,47 @@ const useZoraCreateProvider = () => {
 export { ZoraCreateProvider, useZoraCreateProvider };
 ```
 
+## API
+
+### api/ipfs/route
+
+```tsx
+import saveFile from "@/lib/ipfs/saveFile";
+import { NextRequest } from "next/server";
+
+export const runtime = "edge";
+
+export async function POST(request: NextRequest) {
+  const data = await request.formData();
+  const file: File | null = data.get("file") as unknown as File;
+  data.append("file", file);
+  data.append("pinataMetadata", JSON.stringify({ name: "File to upload" }));
+  const cid = await saveFile(data);
+  return Response.json({ cid }, { status: 200 });
+}
+```
+
+### api/ipfs/generateJWT/route
+
+```tsx
+import generatePinataJWT from "@/lib/ipfs/generatePinataJWT";
+
+export async function GET() {
+  try {
+    const data = await generatePinataJWT();
+    return Response.json(data);
+  } catch (e) {
+    console.log(e);
+    const message = e?.message ?? "failed to generate JWT";
+    return Response.json({ message }, { status: 500 });
+  }
+}
+
+export const dynamic = "force-dynamic";
+export const fetchCache = "force-no-store";
+export const revalidate = 0;
+```
+
 ## Hooks
 
 Create the following hooks:
@@ -843,10 +884,32 @@ export async function uploadJson(json: object): Promise<IPFSUploadResponse> {
 }
 ```
 
+### ipfs/saveFile
+
+```tsx
+const saveFile = async (data: any, jwt?: string) => {
+  const response = await fetch(
+    "https://api.pinata.cloud/pinning/pinFileToIPFS",
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${jwt ?? process.env.PINATA_JWT}`,
+      },
+      body: data,
+    }
+  );
+  const { IpfsHash } = await response.json();
+  return IpfsHash;
+};
+
+export default saveFile;
+```
+
 ### ipfs/uploadFile
 
 ```tsx
 import { hashFiles } from "./hash";
+import saveFile from "./saveFile";
 
 export type IPFSUploadResponse = {
   cid: string;
@@ -876,18 +939,25 @@ const uploadCache = {
   },
 };
 
-export const uploadFile = async (file: File): Promise<IPFSUploadResponse> => {
+export const uploadFile = async (
+  file: File,
+  jwt?: string
+): Promise<IPFSUploadResponse> => {
   try {
     const data = new FormData();
     data.set("file", file);
     const cached = uploadCache.get([file]);
     if (cached) return cached;
-    const res = await fetch("/api/ipfs", {
-      method: "POST",
-      body: data,
-    });
-    const json = await res.json();
-    const { cid } = json;
+
+    let cid: any;
+    if (jwt) {
+      cid = await saveFile(data, jwt);
+    } else {
+      const res = await fetch("/api/ipfs", { method: "POST", body: data });
+      const json = await res.json();
+      cid = json.cid;
+    }
+
     uploadCache.put([file], cid);
     return { cid, uri: `ipfs://${cid}` };
   } catch (error) {
